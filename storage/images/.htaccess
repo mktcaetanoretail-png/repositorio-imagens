@@ -1,0 +1,6 @@
+# Allow direct access to image files in storage
+Options -Indexes
+<FilesMatch "\.(jpg|jpeg|png|gif|webp)$">
+    Allow from all
+    Satisfy any
+</FilesMatch>
