@@ -1,29 +1,32 @@
 CREATE TABLE IF NOT EXISTS images (
-    id                  INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
+    id                  SERIAL          PRIMARY KEY,
     filename            VARCHAR(255)    NOT NULL,
     original_filename   VARCHAR(255)    NOT NULL,
     filepath            VARCHAR(512)    NOT NULL,
     original_filepath   VARCHAR(512)    NOT NULL,
     thumb_filepath      VARCHAR(512)    NOT NULL,
-    filesize            INT UNSIGNED    NOT NULL DEFAULT 0,
-    original_filesize   INT UNSIGNED    NOT NULL DEFAULT 0,
-    optimized_filesize  INT UNSIGNED    NOT NULL DEFAULT 0,
-    optimization_ratio  DECIMAL(5,2)    NOT NULL DEFAULT 0.00,
-    width               SMALLINT UNSIGNED NOT NULL DEFAULT 0,
-    height              SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+    filesize            INTEGER         NOT NULL DEFAULT 0,
+    original_filesize   INTEGER         NOT NULL DEFAULT 0,
+    optimized_filesize  INTEGER         NOT NULL DEFAULT 0,
+    optimization_ratio  NUMERIC(5,2)    NOT NULL DEFAULT 0.00,
+    width               INTEGER         NOT NULL DEFAULT 0,
+    height              INTEGER         NOT NULL DEFAULT 0,
     mime_type           VARCHAR(100)    NOT NULL,
-    brand_id            INT UNSIGNED    NOT NULL,
-    location_id         INT UNSIGNED    NOT NULL,
-    uploaded_by         INT UNSIGNED    NOT NULL,
-    created_at          DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    deleted_at          DATETIME        NULL,
-    FOREIGN KEY (brand_id)    REFERENCES brands(id),
-    FOREIGN KEY (location_id) REFERENCES locations(id),
-    FOREIGN KEY (uploaded_by) REFERENCES users(id),
-    INDEX idx_brand_id    (brand_id),
-    INDEX idx_location_id (location_id),
-    INDEX idx_uploaded_by (uploaded_by),
-    INDEX idx_deleted_at  (deleted_at),
-    INDEX idx_created_at  (created_at)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    brand_id            INTEGER         NOT NULL REFERENCES brands(id),
+    location_id         INTEGER         NOT NULL REFERENCES locations(id),
+    uploaded_by         INTEGER         NOT NULL REFERENCES users(id),
+    created_at          TIMESTAMP       NOT NULL DEFAULT NOW(),
+    updated_at          TIMESTAMP       NOT NULL DEFAULT NOW(),
+    deleted_at          TIMESTAMP       NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_images_brand_id    ON images (brand_id);
+CREATE INDEX IF NOT EXISTS idx_images_location_id ON images (location_id);
+CREATE INDEX IF NOT EXISTS idx_images_uploaded_by ON images (uploaded_by);
+CREATE INDEX IF NOT EXISTS idx_images_deleted_at  ON images (deleted_at);
+CREATE INDEX IF NOT EXISTS idx_images_created_at  ON images (created_at);
+
+DROP TRIGGER IF EXISTS trg_images_updated_at ON images;
+CREATE TRIGGER trg_images_updated_at
+    BEFORE UPDATE ON images
+    FOR EACH ROW EXECUTE FUNCTION set_updated_at();

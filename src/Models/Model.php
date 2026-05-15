@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Core\Database;
-use PDO;
 
 abstract class Model
 {
@@ -18,14 +17,26 @@ abstract class Model
         return Database::getInstance();
     }
 
+    protected function isPgsql(): bool
+    {
+        return $this->db()->getDriver() === 'pgsql';
+    }
+
+    // Quote an identifier for the active driver
+    protected function q(string $identifier): string
+    {
+        return '"' . $identifier . '"';
+    }
+
     public function find(int $id): ?array
     {
-        $sql = "SELECT * FROM `{$this->table}` WHERE `{$this->primaryKey}` = ?";
+        $t  = $this->q($this->table);
+        $pk = $this->q($this->primaryKey);
+        $sql = "SELECT * FROM {$t} WHERE {$pk} = ?";
         if ($this->softDeletes) {
-            $sql .= " AND deleted_at IS NULL";
+            $sql .= ' AND deleted_at IS NULL';
         }
-        $stmt = $this->db()->query($sql, [$id]);
-        $row  = $stmt->fetch();
+        $row = $this->db()->query($sql, [$id])->fetch();
         return $row ?: null;
     }
 
@@ -36,12 +47,13 @@ abstract class Model
         int $offset       = 0
     ): array {
         [$where, $params] = $this->buildWhere($conditions);
+        $t = $this->q($this->table);
 
         if ($this->softDeletes && !isset($conditions['deleted_at'])) {
-            $where[] = "`{$this->table}`.`deleted_at` IS NULL";
+            $where[] = "{$t}.deleted_at IS NULL";
         }
 
-        $sql = "SELECT * FROM `{$this->table}`";
+        $sql = "SELECT * FROM {$t}";
         if (!empty($where)) {
             $sql .= ' WHERE ' . implode(' AND ', $where);
         }
@@ -52,27 +64,35 @@ abstract class Model
             $sql .= " LIMIT {$limit} OFFSET {$offset}";
         }
 
-        $stmt = $this->db()->query($sql, $params);
-        return $stmt->fetchAll();
+        return $this->db()->query($sql, $params)->fetchAll();
     }
 
     public function findBy(string $field, mixed $value): ?array
     {
-        $sql = "SELECT * FROM `{$this->table}` WHERE `{$field}` = ?";
+        $t  = $this->q($this->table);
+        $f  = $this->q($field);
+        $sql = "SELECT * FROM {$t} WHERE {$f} = ?";
         if ($this->softDeletes) {
-            $sql .= " AND deleted_at IS NULL";
+            $sql .= ' AND deleted_at IS NULL';
         }
         $sql .= ' LIMIT 1';
-        $stmt = $this->db()->query($sql, [$value]);
-        $row  = $stmt->fetch();
+        $row = $this->db()->query($sql, [$value])->fetch();
         return $row ?: null;
     }
 
     public function create(array $data): int
     {
-        $columns = implode('`, `', array_keys($data));
+        $cols = implode(', ', array_map(fn($k) => $this->q($k), array_keys($data)));
         $placeholders = implode(', ', array_fill(0, count($data), '?'));
-        $sql = "INSERT INTO `{$this->table}` (`{$columns}`) VALUES ({$placeholders})";
+        $t = $this->q($this->table);
+
+        if ($this->isPgsql()) {
+            $sql = "INSERT INTO {$t} ({$cols}) VALUES ({$placeholders}) RETURNING id";
+            $row = $this->db()->query($sql, array_values($data))->fetch();
+            return (int) ($row['id'] ?? 0);
+        }
+
+        $sql = "INSERT INTO {$t} ({$cols}) VALUES ({$placeholders})";
         $this->db()->query($sql, array_values($data));
         return $this->db()->lastInsertId();
     }
@@ -82,10 +102,11 @@ abstract class Model
         if (empty($data)) {
             return false;
         }
-        $sets = implode(' = ?, ', array_map(fn($k) => "`{$k}`", array_keys($data))) . ' = ?';
-        $sql  = "UPDATE `{$this->table}` SET {$sets} WHERE `{$this->primaryKey}` = ?";
-        $params = array_merge(array_values($data), [$id]);
-        $stmt = $this->db()->query($sql, $params);
+        $sets = implode(', ', array_map(fn($k) => $this->q($k) . ' = ?', array_keys($data)));
+        $pk   = $this->q($this->primaryKey);
+        $t    = $this->q($this->table);
+        $sql  = "UPDATE {$t} SET {$sets} WHERE {$pk} = ?";
+        $stmt = $this->db()->query($sql, [...array_values($data), $id]);
         return $stmt->rowCount() >= 0;
     }
 
@@ -94,15 +115,20 @@ abstract class Model
         if (!$this->softDeletes) {
             return $this->hardDelete($id);
         }
-        $sql  = "UPDATE `{$this->table}` SET `deleted_at` = NOW() WHERE `{$this->primaryKey}` = ?";
-        $stmt = $this->db()->query($sql, [$id]);
+        $t  = $this->q($this->table);
+        $pk = $this->q($this->primaryKey);
+        $stmt = $this->db()->query(
+            "UPDATE {$t} SET deleted_at = NOW() WHERE {$pk} = ?",
+            [$id]
+        );
         return $stmt->rowCount() > 0;
     }
 
     public function hardDelete(int $id): bool
     {
-        $sql  = "DELETE FROM `{$this->table}` WHERE `{$this->primaryKey}` = ?";
-        $stmt = $this->db()->query($sql, [$id]);
+        $t  = $this->q($this->table);
+        $pk = $this->q($this->primaryKey);
+        $stmt = $this->db()->query("DELETE FROM {$t} WHERE {$pk} = ?", [$id]);
         return $stmt->rowCount() > 0;
     }
 
@@ -111,26 +137,30 @@ abstract class Model
         if (!$this->softDeletes) {
             return false;
         }
-        $sql  = "UPDATE `{$this->table}` SET `deleted_at` = NULL WHERE `{$this->primaryKey}` = ?";
-        $stmt = $this->db()->query($sql, [$id]);
+        $t  = $this->q($this->table);
+        $pk = $this->q($this->primaryKey);
+        $stmt = $this->db()->query(
+            "UPDATE {$t} SET deleted_at = NULL WHERE {$pk} = ?",
+            [$id]
+        );
         return $stmt->rowCount() > 0;
     }
 
     public function count(array $conditions = []): int
     {
         [$where, $params] = $this->buildWhere($conditions);
+        $t = $this->q($this->table);
 
         if ($this->softDeletes && !isset($conditions['deleted_at'])) {
-            $where[] = "`{$this->table}`.`deleted_at` IS NULL";
+            $where[] = "{$t}.deleted_at IS NULL";
         }
 
-        $sql = "SELECT COUNT(*) as cnt FROM `{$this->table}`";
+        $sql = "SELECT COUNT(*) AS cnt FROM {$t}";
         if (!empty($where)) {
             $sql .= ' WHERE ' . implode(' AND ', $where);
         }
 
-        $stmt = $this->db()->query($sql, $params);
-        $row  = $stmt->fetch();
+        $row = $this->db()->query($sql, $params)->fetch();
         return (int) ($row['cnt'] ?? 0);
     }
 
@@ -139,10 +169,11 @@ abstract class Model
         $where  = [];
         $params = [];
         foreach ($conditions as $field => $value) {
+            $f = $this->q($field);
             if ($value === null) {
-                $where[] = "`{$field}` IS NULL";
+                $where[] = "{$f} IS NULL";
             } else {
-                $where[] = "`{$field}` = ?";
+                $where[] = "{$f} = ?";
                 $params[] = $value;
             }
         }

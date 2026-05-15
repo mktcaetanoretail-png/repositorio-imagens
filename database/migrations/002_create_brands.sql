@@ -1,6 +1,8 @@
 CREATE TABLE IF NOT EXISTS brands (
-    id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    id         SERIAL      PRIMARY KEY,
     name       VARCHAR(100) NOT NULL,
     slug       VARCHAR(100) NOT NULL UNIQUE,
-    created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    created_at TIMESTAMP    NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_brands_slug ON brands (slug);
