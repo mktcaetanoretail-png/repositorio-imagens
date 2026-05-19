@@ -5,9 +5,9 @@ declare(strict_types=1);
 // Autoload
 require_once __DIR__ . '/../vendor/autoload.php';
 
-// Load .env
+// Load .env if present (not available on Vercel — env vars set via dashboard)
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
-$dotenv->load();
+$dotenv->safeLoad();
 
 // Error reporting based on env
 if (env('APP_DEBUG', false)) {
