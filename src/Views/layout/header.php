@@ -19,8 +19,8 @@
         </button>
         <a href="<?= url('/') ?>" class="brand-logo">
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-                <rect width="28" height="28" rx="6" fill="#1B6CB2"/>
-                <path d="M5 20L10 13l4 5 3-4 6 6H5z" fill="white" opacity=".9"/>
+                <rect width="28" height="28" rx="6" fill="#0D2E5D"/>
+                <path d="M5 20L10 13l4 5 3-4 6 6H5z" fill="#00B8F1" opacity=".95"/>
                 <circle cx="19" cy="9" r="3" fill="white" opacity=".9"/>
             </svg>
             <span><?= e(env('APP_NAME', 'Repositório de Imagens')) ?></span>
