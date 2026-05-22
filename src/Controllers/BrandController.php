@@ -26,6 +26,7 @@ class BrandController extends Controller
         $this->render('brands/index', [
             'brands'     => $brands,
             'pageTitle'  => 'Marcas',
+            'bodyClass'  => 'page-home',
             'csrf_token' => $this->csrfToken(),
         ]);
     }

@@ -1813,6 +1813,12 @@ body.lightbox-open { overflow: hidden; }
     margin-bottom: 2rem;
 }
 
+/* Compensate for sidebar offset so content sits on the true viewport centre */
+.page-home .repo-hero,
+.page-home .brands-grid {
+    transform: translateX(calc(var(--sidebar-w) / -2));
+}
+
 .repo-hero-logo {
     display: block;
     width: 220px;
