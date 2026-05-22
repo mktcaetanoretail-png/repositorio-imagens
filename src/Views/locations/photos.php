@@ -102,7 +102,7 @@ $slotNames = [
             </svg>
             <p class="photo-slot-upload-text"><?= e($slotNames[$s] ?? 'Slot ' . $s) ?></p>
             <p class="photo-slot-upload-hint">Clique ou arraste</p>
-            <p class="photo-slot-upload-hint" style="font-size:.72rem;margin-top:.15rem">Máx. <?= e(env('UPLOAD_MAX_SIZE_MB', 5)) ?> MB</p>
+            <p class="photo-slot-upload-hint" style="font-size:.72rem;margin-top:.15rem">Máx. <?= e(env('UPLOAD_MAX_SIZE_MB', 4)) ?> MB</p>
         </div>
     </div>
     <?php else: ?>
@@ -268,7 +268,14 @@ $slotNames = [
         return confirmData;
     }
 
+    const uploadMaxMb = <?= (int) env('UPLOAD_MAX_SIZE_MB', 4) ?>;
+
     async function uploadFile(file, slotIndex, slotNumber) {
+        if (file.size > uploadMaxMb * 1024 * 1024) {
+            showToast('Ficheiro demasiado grande. Máximo: ' + uploadMaxMb + ' MB.', 'error');
+            return;
+        }
+
         const uploading = document.getElementById('uploading-' + slotIndex);
         const content   = document.getElementById('uploadContent-' + slotIndex);
         if (uploading) { uploading.style.display = 'flex'; }
@@ -284,6 +291,7 @@ $slotNames = [
                 fd.append('slot',  slotNumber);
                 fd.append('csrf_token', csrfToken);
                 const res = await fetch(uploadUrl, { method: 'POST', body: fd });
+                if (res.status === 413) throw new Error('Ficheiro demasiado grande para o servidor. Máximo: ' + uploadMaxMb + ' MB.');
                 data = await res.json();
             }
 

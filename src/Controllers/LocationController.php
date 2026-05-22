@@ -111,9 +111,9 @@ class LocationController extends Controller
             $this->json(['success' => false, 'error' => $this->uploadError($file['error'])], 422);
         }
 
-        $maxBytes = ((int) env('UPLOAD_MAX_SIZE_MB', 5)) * 1024 * 1024;
+        $maxBytes = ((int) env('UPLOAD_MAX_SIZE_MB', 4)) * 1024 * 1024;
         if ($file['size'] > $maxBytes) {
-            $this->json(['success' => false, 'error' => 'Ficheiro demasiado grande. Máximo: ' . env('UPLOAD_MAX_SIZE_MB', 5) . ' MB.'], 422);
+            $this->json(['success' => false, 'error' => 'Ficheiro demasiado grande. Máximo: ' . env('UPLOAD_MAX_SIZE_MB', 4) . ' MB.'], 422);
         }
 
         $mime = mime_content_type($file['tmp_name']);
