@@ -1601,8 +1601,8 @@ body.lightbox-open { overflow: hidden; }
    ============================================================ */
 .locations-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.25rem;
 }
 
 .location-card {
@@ -1625,7 +1625,7 @@ body.lightbox-open { overflow: hidden; }
 .location-card-thumbnails {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    height: 90px;
+    height: 140px;
     background: var(--bg);
 }
 
