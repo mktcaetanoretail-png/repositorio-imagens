@@ -48,12 +48,7 @@
     <?php endif; ?>
 </div>
 <?php else: ?>
-<?php $brandLocations = $locations; ?>
-<div class="brand-layout">
-    <?php require_once __DIR__ . '/../layout/_brand_sidebar.php'; ?>
-
-    <div class="brand-content">
-        <div class="locations-grid">
+<div class="locations-grid">
             <?php foreach ($locations as $loc): ?>
             <a href="<?= url('/brand/' . $brand['id'] . '/location/' . $loc['id']) ?>" class="location-card">
                 <div class="location-card-thumbnails">
@@ -88,8 +83,6 @@
             </a>
             <?php endforeach; ?>
         </div>
-    </div>
-</div>
 <?php endif; ?>
 
 <?php require_once __DIR__ . '/../layout/footer.php'; ?>
