@@ -229,8 +229,8 @@ $slotNames = [
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, w, h);
 
-                // Try decreasing quality until under limit
-                const qualities = [0.90, 0.82, 0.72, 0.60, 0.45];
+                // Always compress at good quality first, then reduce if over limit
+                const qualities = [0.85, 0.75, 0.62, 0.50, 0.40];
                 let idx = 0;
 
                 function tryQuality() {
@@ -321,7 +321,7 @@ $slotNames = [
         if (uploading) { uploading.style.display = 'flex'; }
         if (content)   { content.style.display   = 'none'; }
 
-        // Optimise before upload: resize to max 1920px and compress if needed
+        // Always optimise: resize to max 1920px and compress to JPEG at good quality
         if (file.type.startsWith('image/') && file.type !== 'image/gif') {
             try {
                 const original = file;
