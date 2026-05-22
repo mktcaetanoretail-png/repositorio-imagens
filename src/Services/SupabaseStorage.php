@@ -35,6 +35,7 @@ class SupabaseStorage
             CURLOPT_POSTFIELDS     => file_get_contents($localPath),
             CURLOPT_HTTPHEADER     => [
                 'Authorization: Bearer ' . $this->key,
+                'apikey: ' . $this->key,
                 'Content-Type: ' . $mime,
                 'x-upsert: true',
             ],
@@ -75,6 +76,7 @@ class SupabaseStorage
             CURLOPT_POSTFIELDS     => json_encode(['prefixes' => array_map(fn($p) => ltrim($p, '/'), $storagePaths)]),
             CURLOPT_HTTPHEADER     => [
                 'Authorization: Bearer ' . $this->key,
+                'apikey: ' . $this->key,
                 'Content-Type: application/json',
             ],
             CURLOPT_SSL_VERIFYPEER => true,
