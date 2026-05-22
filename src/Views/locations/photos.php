@@ -102,6 +102,7 @@ $slotNames = [
             </svg>
             <p class="photo-slot-upload-text"><?= e($slotNames[$s] ?? 'Slot ' . $s) ?></p>
             <p class="photo-slot-upload-hint">Clique ou arraste</p>
+            <p class="photo-slot-upload-hint" style="font-size:.72rem;margin-top:.15rem">Máx. <?= e(env('UPLOAD_MAX_SIZE_MB', 20)) ?> MB</p>
         </div>
     </div>
     <?php else: ?>
