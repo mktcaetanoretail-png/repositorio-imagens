@@ -115,23 +115,40 @@ class SupabaseStorage
             return;
         }
 
+        $paths    = array_values(array_map(fn($p) => ltrim($p, '/'), $storagePaths));
         $endpoint = $this->url . '/storage/v1/object/' . $this->bucket;
+        $body     = json_encode(['prefixes' => $paths]);
+
+        error_log('SupabaseStorage::delete endpoint=' . $endpoint . ' paths=' . implode(', ', $paths));
 
         $ch = curl_init($endpoint);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_CUSTOMREQUEST  => 'DELETE',
-            CURLOPT_POSTFIELDS     => json_encode(['prefixes' => array_map(fn($p) => ltrim($p, '/'), $storagePaths)]),
+            CURLOPT_POSTFIELDS     => $body,
             CURLOPT_HTTPHEADER     => [
                 'Authorization: Bearer ' . $this->key,
                 'apikey: ' . $this->key,
                 'Content-Type: application/json',
             ],
             CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_TIMEOUT        => 30,
         ]);
 
-        curl_exec($ch);
+        $response = curl_exec($ch);
+        $status   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlErr  = curl_error($ch);
         curl_close($ch);
+
+        error_log('SupabaseStorage::delete status=' . $status . ' response=' . $response);
+
+        if ($curlErr) {
+            throw new \RuntimeException('Supabase Storage delete cURL error: ' . $curlErr);
+        }
+
+        if ($status < 200 || $status >= 300) {
+            throw new \RuntimeException('Supabase Storage delete failed (' . $status . '): ' . $response);
+        }
     }
 
     public function publicUrl(string $storagePath): string
