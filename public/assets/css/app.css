@@ -2060,8 +2060,9 @@ body.lightbox-open { overflow: hidden; }
 }
 
 .brand-sidebar-item--active {
-    background: rgba(0, 131, 176, .07);
+    background: rgba(0, 131, 176, .12);
     border-left-color: var(--accent);
+    border-left-width: 4px;
 }
 
 .brand-sidebar-item-name {
@@ -2070,7 +2071,10 @@ body.lightbox-open { overflow: hidden; }
     color: var(--text);
 }
 
-.brand-sidebar-item--active .brand-sidebar-item-name { color: var(--accent); }
+.brand-sidebar-item--active .brand-sidebar-item-name {
+    color: var(--accent);
+    font-weight: 700;
+}
 
 .brand-sidebar-item-count {
     display: flex;
