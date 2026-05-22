@@ -17,15 +17,23 @@
 <?php else: ?>
 <div class="brands-grid">
     <?php foreach ($brands as $brand): ?>
+    <?php
+        $logoFile = __DIR__ . '/../../../public/assets/img/brands/' . $brand['slug'] . '.svg';
+        $logoUrl  = url('assets/img/brands/' . $brand['slug'] . '.svg');
+        $hasLogo  = file_exists($logoFile);
+    ?>
     <a href="<?= url('/brand/' . $brand['id']) ?>" class="brand-card">
         <div class="brand-card-icon">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="2" y="3" width="20" height="14" rx="2"/>
-                <path d="M8 21h8M12 17v4"/>
-            </svg>
+            <?php if ($hasLogo): ?>
+            <img src="<?= e($logoUrl) ?>" alt="<?= e($brand['name']) ?>" class="brand-card-logo">
+            <?php else: ?>
+            <div class="brand-card-monogram"><?= e(mb_strtoupper(mb_substr($brand['name'], 0, 2))) ?></div>
+            <?php endif; ?>
         </div>
-        <div class="brand-card-name"><?= e($brand['name']) ?></div>
-        <div class="brand-card-meta"><?= e($brand['location_count']) ?> <?= $brand['location_count'] === 1 ? 'localização' : 'localizações' ?></div>
+        <div class="brand-card-body">
+            <div class="brand-card-name"><?= e($brand['name']) ?></div>
+            <div class="brand-card-meta"><?= e($brand['location_count']) ?> <?= $brand['location_count'] === 1 ? 'localização' : 'localizações' ?></div>
+        </div>
     </a>
     <?php endforeach; ?>
 </div>

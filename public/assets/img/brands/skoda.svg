@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 60">
+  <!-- Škoda winged arrow -->
+  <circle cx="30" cy="30" r="26" fill="#4ba82e"/>
+  <!-- Arrow pointing right -->
+  <path d="M14,30 L34,14 L34,22 L46,22 L46,38 L34,38 L34,46 Z" fill="white"/>
+  <!-- Wing top -->
+  <path d="M14,30 L34,14 L26,30 Z" fill="white" opacity="0.7"/>
+  <text x="105" y="37" font-family="Arial, sans-serif" font-size="18" font-weight="700"
+        fill="#1a1a1a" text-anchor="middle" letter-spacing="1">ŠKODA</text>
+</svg>

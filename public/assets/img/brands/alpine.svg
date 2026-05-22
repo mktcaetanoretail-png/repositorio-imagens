@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 50">
+  <!-- Alpine wordmark in blue -->
+  <text x="80" y="36" font-family="Arial, sans-serif" font-size="30" font-weight="700"
+        fill="#0066cc" text-anchor="middle" letter-spacing="4">ALPINE</text>
+  <!-- Blue underline bar -->
+  <rect x="12" y="42" width="136" height="3" fill="#0066cc"/>
+</svg>

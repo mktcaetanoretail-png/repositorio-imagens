@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 60">
+  <!-- Dongfeng stylized D/bird -->
+  <path d="M10,10 C10,10 42,8 46,30 C50,52 18,52 18,52 L18,44 C18,44 36,44 34,30 C32,16 10,18 10,18 Z" fill="#e2001a"/>
+  <path d="M22,22 C22,22 38,22 38,30 C38,38 22,38 22,38 Z" fill="white"/>
+  <text x="105" y="37" font-family="Arial, sans-serif" font-size="16" font-weight="700"
+        fill="#1a1a1a" text-anchor="middle" letter-spacing="1">DONGFENG</text>
+</svg>

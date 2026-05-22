@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 60">
+  <!-- Geely G mark (circle with opening) -->
+  <path d="M30,8 A22,22 0 1,0 30,52 L30,38 L42,38 L42,30 L22,30 L22,44 A22,22 0 1,1 52,30 Z" fill="#003087" transform="translate(0,0)"/>
+  <text x="105" y="37" font-family="Arial, sans-serif" font-size="20" font-weight="700"
+        fill="#003087" text-anchor="middle" letter-spacing="1">GEELY</text>
+</svg>

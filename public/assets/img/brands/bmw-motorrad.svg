@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60">
+  <circle cx="30" cy="30" r="29" fill="#1a1a1a"/>
+  <circle cx="30" cy="30" r="23" fill="white"/>
+  <path d="M30 7 A23 23 0 0 1 53 30 L30 30 Z" fill="#1c69d4"/>
+  <path d="M30 53 A23 23 0 0 1 7 30 L30 30 Z" fill="#1c69d4"/>
+  <line x1="30" y1="7" x2="30" y2="53" stroke="#1a1a1a" stroke-width="1.5"/>
+  <line x1="7" y1="30" x2="53" y2="30" stroke="#1a1a1a" stroke-width="1.5"/>
+  <circle cx="30" cy="30" r="23" fill="none" stroke="#1a1a1a" stroke-width="1"/>
+  <circle cx="30" cy="30" r="29" fill="none" stroke="#1a1a1a" stroke-width="2"/>
+</svg>

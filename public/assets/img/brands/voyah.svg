@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 60">
+  <!-- VOYAH stylized V mark -->
+  <path d="M20,10 L32,38 L40,20 L48,38 L60,10" fill="none" stroke="#c8a84b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="108" y="38" font-family="Arial, sans-serif" font-size="22" font-weight="700"
+        fill="#1a1a1a" text-anchor="middle" letter-spacing="2">VOYAH</text>
+</svg>

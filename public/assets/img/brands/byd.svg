@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60">
+  <!-- BYD logo: stylized BYD in rectangle -->
+  <rect x="4" y="8" width="112" height="44" rx="4" fill="#1d2d5e" stroke="#1d2d5e" stroke-width="1"/>
+  <text x="60" y="40" font-family="Arial Black, Arial, sans-serif" font-size="28" font-weight="900"
+        fill="white" text-anchor="middle" letter-spacing="3">BYD</text>
+</svg>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60">
+  <!-- Opel lightning bolt circle -->
+  <circle cx="30" cy="30" r="27" fill="#f0c000" stroke="#1a1a1a" stroke-width="2"/>
+  <!-- Lightning bolt -->
+  <path d="M28 8 L16 30 L26 30 L22 52 L38 26 L28 26 Z" fill="#1a1a1a"/>
+  <!-- OPEL text -->
+  <text x="78" y="37" font-family="Arial, sans-serif" font-size="20" font-weight="700"
+        fill="#1a1a1a" text-anchor="middle" letter-spacing="1">OPEL</text>
+</svg>

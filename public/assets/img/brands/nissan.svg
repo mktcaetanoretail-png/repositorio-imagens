@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 60">
+  <!-- Outer oval -->
+  <ellipse cx="70" cy="30" rx="68" ry="28" fill="none" stroke="#c3002f" stroke-width="4"/>
+  <!-- Horizontal bar through middle -->
+  <rect x="2" y="22" width="136" height="16" fill="white"/>
+  <rect x="2" y="22" width="136" height="16" fill="none" stroke="#c3002f" stroke-width="1"/>
+  <!-- NISSAN text -->
+  <text x="70" y="34" font-family="Arial Black, Arial, sans-serif" font-size="13" font-weight="900"
+        fill="#c3002f" text-anchor="middle" letter-spacing="2">NISSAN</text>
+</svg>

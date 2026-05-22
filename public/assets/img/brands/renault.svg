@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60">
+  <!-- Renault diamond/lozenge -->
+  <polygon points="30,4 52,30 30,56 8,30" fill="none" stroke="#efdf00" stroke-width="4"/>
+  <!-- Inner diamond outline -->
+  <polygon points="30,13 44,30 30,47 16,30" fill="#efdf00"/>
+  <polygon points="30,20 38,30 30,40 22,30" fill="none" stroke="white" stroke-width="2.5"/>
+</svg>

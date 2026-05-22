@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 60">
+  <!-- Dacia D mark (two D shapes interlocked) -->
+  <path d="M14,10 L14,50 C14,50 36,50 36,30 C36,10 14,10 14,10 Z M14,18 C14,18 28,18 28,30 C28,42 14,42 14,42 Z" fill="#1a3c6d"/>
+  <path d="M28,10 L28,50 C28,50 50,50 50,30 C50,10 28,10 28,10 Z M28,18 C28,18 42,18 42,30 C42,42 28,42 28,42 Z" fill="#1a3c6d" opacity="0.5"/>
+  <!-- DACIA text -->
+  <text x="105" y="37" font-family="Arial, sans-serif" font-size="22" font-weight="700"
+        fill="#1a3c6d" text-anchor="middle" letter-spacing="2">DACIA</text>
+</svg>

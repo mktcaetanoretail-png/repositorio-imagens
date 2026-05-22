@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 60">
+  <!-- Simplified Peugeot lion silhouette -->
+  <path d="M24,8 C24,8 18,10 16,16 C14,22 18,26 22,26 C18,28 14,32 16,40 C18,46 24,48 30,46 C28,44 26,40 28,36 C30,32 36,30 40,28 C44,26 44,20 42,16 C40,12 36,8 30,8 Z" fill="#1a1a1a"/>
+  <circle cx="26" cy="16" r="3" fill="white"/>
+  <!-- PEUGEOT text -->
+  <text x="78" y="36" font-family="Arial, sans-serif" font-size="14" font-weight="700"
+        fill="#1a1a1a" text-anchor="middle" letter-spacing="1">PEUGEOT</text>
+</svg>

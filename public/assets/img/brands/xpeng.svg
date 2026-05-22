@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 60">
+  <!-- XPENG P mark -->
+  <path d="M14,10 L14,50 M14,10 L26,10 C34,10 40,16 40,24 C40,32 34,38 26,38 L14,38" fill="none" stroke="#00a0e9" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="105" y="38" font-family="Arial, sans-serif" font-size="20" font-weight="700"
+        fill="#1a1a1a" text-anchor="middle" letter-spacing="2">XPENG</text>
+</svg>
