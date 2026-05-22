@@ -1,39 +1,48 @@
 <?php require_once __DIR__ . '/../layout/header.php'; ?>
 
-<div class="page-header">
-    <div class="page-header-left">
-        <a href="<?= url('/') ?>" class="back-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="m15 18-6-6 6-6"/>
-            </svg>
-            Marcas
-        </a>
-        <h1 class="page-title"><?= e($brand['name']) ?></h1>
-        <span class="total-count"><?= e(count($locations)) ?> localizações</span>
-    </div>
-    <?php if ($auth->can('manage_brands')): ?>
-    <div class="page-header-right">
+<div class="brand-header">
+    <a href="<?= url('/') ?>" class="brand-header-back">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="m15 18-6-6 6-6"/>
+        </svg>
+        Marcas
+    </a>
+    <div class="brand-header-body">
+        <div class="brand-header-identity">
+            <div class="brand-header-monogram"><?= e(mb_substr($brand['name'], 0, 1)) ?></div>
+            <div>
+                <h1 class="brand-header-name"><?= e($brand['name']) ?></h1>
+                <p class="brand-header-meta">
+                    <?= e(count($locations)) ?> <?= count($locations) === 1 ? 'localização' : 'localizações' ?>
+                </p>
+            </div>
+        </div>
+        <?php if ($auth->can('manage_brands')): ?>
         <a href="<?= url('/admin/brands/' . $brand['id'] . '/locations') ?>" class="btn btn-secondary btn-sm">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
             </svg>
             Gerir localizações
         </a>
+        <?php endif; ?>
     </div>
-    <?php endif; ?>
 </div>
 
 <?php if (empty($locations)): ?>
-<div class="empty-state">
-    <svg class="empty-state-svg" viewBox="0 0 160 120" fill="none">
-        <circle cx="80" cy="55" r="35" fill="#e2e8f0"/>
-        <path d="M80 30 L80 80" stroke="#cbd5e1" stroke-width="3"/>
-        <path d="M55 55 L105 55" stroke="#cbd5e1" stroke-width="3"/>
-    </svg>
+<div class="empty-state empty-state--brand">
+    <div class="empty-state-icon">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+        </svg>
+    </div>
     <h2 class="empty-state-title">Nenhuma localização configurada</h2>
-    <p class="empty-state-text">As localizações desta marca ainda não foram criadas.</p>
+    <p class="empty-state-text">As localizações da marca <strong><?= e($brand['name']) ?></strong> ainda não foram criadas.</p>
     <?php if ($auth->can('manage_brands')): ?>
     <a href="<?= url('/admin/brands/' . $brand['id'] . '/locations') ?>" class="btn btn-primary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
         Criar localizações
     </a>
     <?php endif; ?>

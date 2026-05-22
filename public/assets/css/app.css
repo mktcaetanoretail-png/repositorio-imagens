@@ -1899,6 +1899,96 @@ body.lightbox-open { overflow: hidden; }
 }
 
 /* ============================================================
+   Brand Header (marca page)
+   ============================================================ */
+.brand-header {
+    margin-bottom: 1.75rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.brand-header-back {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    font-size: .78rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    text-decoration: none;
+    margin-bottom: 1rem;
+    transition: color var(--transition);
+}
+
+.brand-header-back:hover { color: var(--accent); text-decoration: none; }
+
+.brand-header-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.brand-header-identity {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.brand-header-monogram {
+    width: 52px;
+    height: 52px;
+    background: var(--primary);
+    color: #fff;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(13, 46, 93, .25);
+}
+
+.brand-header-name {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--text);
+}
+
+.brand-header-meta {
+    font-size: .82rem;
+    color: var(--text-muted);
+    margin-top: .2rem;
+}
+
+/* Empty state com ícone em destaque */
+.empty-state-icon {
+    width: 64px;
+    height: 64px;
+    background: rgba(0, 131, 176, .1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    margin: 0 auto 1.25rem;
+}
+
+.empty-state--brand {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    max-width: 440px;
+    margin: 2rem auto;
+    padding: 3rem 2rem;
+}
+
+/* ============================================================
    Brand Layout (sidebar + content)
    ============================================================ */
 .brand-layout {
