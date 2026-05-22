@@ -1541,6 +1541,8 @@ body.lightbox-open { overflow: hidden; }
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 1.25rem;
+    max-width: 900px;
+    margin: 0 auto;
 }
 
 .brand-card {
@@ -1800,6 +1802,41 @@ body.lightbox-open { overflow: hidden; }
     flex-direction: column;
     gap: .5rem;
     border-radius: var(--radius-lg);
+}
+
+/* ============================================================
+   Repo Hero (brand index page)
+   ============================================================ */
+.repo-hero {
+    text-align: center;
+    padding: 2.5rem 1rem 2rem;
+    margin-bottom: 2rem;
+}
+
+.repo-hero-wordmark {
+    display: block;
+    font-family: 'Nunito', 'Inter', sans-serif;
+    font-weight: 800;
+    font-size: 3.5rem;
+    letter-spacing: -.04em;
+    color: var(--primary);
+    line-height: 1;
+    margin-bottom: .75rem;
+    user-select: none;
+}
+
+.repo-hero-title {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    margin-bottom: .5rem;
+}
+
+.repo-hero-sub {
+    font-size: .8rem;
+    color: var(--text-light);
 }
 
 /* ============================================================
