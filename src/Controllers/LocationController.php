@@ -116,6 +116,8 @@ class LocationController extends Controller
         }
 
         $user    = $this->auth->user();
+        $userId  = (!empty($user['id']) && $user['id'] > 0) ? $user['id'] : null;
+
         $imageId = $imageModel->create([
             'filename'           => $result['filename'],
             'original_filename'  => $file['name'],
@@ -131,7 +133,7 @@ class LocationController extends Controller
             'mime_type'          => $result['mime_type'],
             'brand_id'           => $brand['id'],
             'location_id'        => $location['id'],
-            'uploaded_by'        => $user['id'],
+            'uploaded_by'        => $userId,
         ]);
 
         $auditLog = new AuditLog();
