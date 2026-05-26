@@ -19,6 +19,25 @@ class Location extends Model
         )->fetchAll();
     }
 
+    /**
+     * Full-text search across location and brand names.
+     * Returns up to $limit results with brand info for autocomplete.
+     */
+    public function search(string $query, int $limit = 10): array
+    {
+        $like = '%' . $query . '%';
+        return $this->db()->query(
+            'SELECT l.slug AS loc_slug, l.name AS loc_name,
+                    b.slug AS brand_slug, b.name AS brand_name
+             FROM "locations" l
+             JOIN "brands" b ON b.id = l.brand_id
+             WHERE l.name LIKE ? OR b.name LIKE ?
+             ORDER BY b.name ASC, l.name ASC
+             LIMIT ' . (int) $limit,
+            [$like, $like]
+        )->fetchAll();
+    }
+
     public function slugExistsForBrand(string $slug, int $brandId, ?int $excludeId = null): bool
     {
         $sql    = 'SELECT COUNT(*) AS cnt FROM "locations" WHERE "slug" = ? AND "brand_id" = ?';

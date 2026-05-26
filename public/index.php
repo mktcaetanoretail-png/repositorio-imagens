@@ -65,6 +65,9 @@ $router->post('/marcas/:brand_slug/:loc_slug/carregar/confirmar', 'LocationContr
 $router->post('/foto/:id/eliminar', 'LocationController@delete');
 $router->get('/foto/:id', 'GalleryController@show');
 
+// Search autocomplete
+$router->get('/pesquisa/sugestoes', 'SearchController@suggest');
+
 // Storage — serve uploaded images
 $router->get('/storage/images/:slug/:file', 'StorageController@serve');
 

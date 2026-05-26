@@ -25,39 +25,22 @@
             <span></span><span></span><span></span>
         </button>
         <a href="<?= url('/') ?>" class="brand-logo">
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-                <rect width="28" height="28" rx="6" fill="#0D2E5D"/>
-                <path d="M5 20L10 13l4 5 3-4 6 6H5z" fill="#00B8F1" opacity=".95"/>
-                <circle cx="19" cy="9" r="3" fill="white" opacity=".9"/>
-            </svg>
-            <span><?= e(env('APP_NAME', 'Repositório de Imagens')) ?></span>
+            <img src="<?= url('assets/img/caetano-logo.svg') ?>" alt="Caetano" class="brand-logo-img">
         </a>
     </div>
 
     <div class="navbar-search">
-        <form action="<?= url('/') ?>" method="get" role="search">
-            <div class="search-input-wrap">
-                <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-                </svg>
-                <input type="search" name="search" placeholder="Pesquisar imagens..."
-                       value="<?= e($_GET['search'] ?? '') ?>" class="search-input" autocomplete="off">
-            </div>
-        </form>
+        <div class="search-input-wrap">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+            <input type="search" id="headerSearch" placeholder="Pesquisar marca ou localização..."
+                   class="search-input" autocomplete="off" spellcheck="false">
+            <div class="search-autocomplete" id="searchAutocomplete" hidden></div>
+        </div>
     </div>
 
     <div class="navbar-actions">
-        <?php if ($auth->can('upload')): ?>
-        <button class="btn btn-primary btn-sm" id="openUploadModal">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
-            </svg>
-            <span>Carregar</span>
-        </button>
-        <?php endif; ?>
-
         <div class="user-menu" id="userMenu">
             <button class="user-menu-trigger" id="userMenuTrigger">
                 <div class="user-avatar"><?= e(mb_substr($auth->user()['name'] ?? 'U', 0, 1)) ?></div>
@@ -108,6 +91,78 @@
         </div>
     </div>
 </nav>
+
+<script>
+(function () {
+    const input = document.getElementById('headerSearch');
+    const box   = document.getElementById('searchAutocomplete');
+    if (!input || !box) return;
+
+    let timer, active = -1;
+
+    function esc(str) {
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function close() { box.hidden = true; active = -1; }
+
+    function renderItems(items) {
+        if (!items.length) {
+            box.innerHTML = '<div class="search-autocomplete-empty">Nenhum resultado encontrado.</div>';
+            box.hidden = false;
+            return;
+        }
+        box.innerHTML = items.map((item, i) =>
+            `<a href="/marcas/${esc(item.brand_slug)}/${esc(item.loc_slug)}"
+                class="search-autocomplete-item" data-idx="${i}">
+                <span class="search-autocomplete-brand">${esc(item.brand_name)}</span>
+                <span class="search-autocomplete-sep">›</span>
+                <span class="search-autocomplete-loc">${esc(item.loc_name)}</span>
+             </a>`
+        ).join('');
+        box.hidden = false;
+        active = -1;
+    }
+
+    async function fetchSuggestions(q) {
+        try {
+            const res  = await fetch('/pesquisa/sugestoes?q=' + encodeURIComponent(q),
+                { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            const data = await res.json();
+            renderItems(data);
+        } catch (_) { close(); }
+    }
+
+    input.addEventListener('input', function () {
+        clearTimeout(timer);
+        const q = this.value.trim();
+        if (q.length < 4) { close(); return; }
+        timer = setTimeout(() => fetchSuggestions(q), 260);
+    });
+
+    input.addEventListener('keydown', function (e) {
+        const items = box.querySelectorAll('.search-autocomplete-item');
+        if (e.key === 'Escape') { close(); return; }
+        if (!items.length) return;
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            active = Math.min(active + 1, items.length - 1);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            active = Math.max(active - 1, 0);
+        } else if (e.key === 'Enter' && active >= 0) {
+            e.preventDefault();
+            items[active].click();
+            return;
+        }
+        items.forEach((el, i) => el.classList.toggle('is-active', i === active));
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!input.contains(e.target) && !box.contains(e.target)) close();
+    });
+})();
+</script>
 
 <div class="app-layout">
     <aside class="sidebar" id="sidebar">

@@ -110,7 +110,7 @@ code { font-family: 'SFMono-Regular', Consolas, monospace; font-size: .875em; ba
     transition: var(--transition);
 }
 
-.navbar-search { flex: 1; max-width: 400px; }
+.navbar-search { flex: 1; max-width: 500px; }
 
 .search-input-wrap { position: relative; }
 
@@ -140,6 +140,67 @@ code { font-family: 'SFMono-Regular', Consolas, monospace; font-size: .875em; ba
 .search-input:focus {
     background: rgba(255,255,255,.15);
     border-color: rgba(255,255,255,.3);
+}
+
+/* Brand logo image (Caetano) */
+.brand-logo-img {
+    height: 26px;
+    width: auto;
+    filter: brightness(0) invert(1);
+    display: block;
+}
+
+/* Search autocomplete dropdown */
+.search-autocomplete {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: 0 8px 28px rgba(13,46,93,.18);
+    overflow: hidden;
+    z-index: 1200;
+    max-height: 340px;
+    overflow-y: auto;
+}
+.search-autocomplete-item {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .6rem .875rem;
+    cursor: pointer;
+    transition: background .1s;
+    text-decoration: none;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+}
+.search-autocomplete-item:last-child { border-bottom: none; }
+.search-autocomplete-item:hover,
+.search-autocomplete-item.is-active {
+    background: #f0f5ff;
+    text-decoration: none;
+}
+.search-autocomplete-brand {
+    font-size: .75rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    font-weight: 500;
+}
+.search-autocomplete-sep {
+    color: var(--text-muted);
+    font-size: .8rem;
+}
+.search-autocomplete-loc {
+    font-size: .875rem;
+    font-weight: 600;
+    color: var(--text);
+}
+.search-autocomplete-empty {
+    padding: .875rem;
+    text-align: center;
+    font-size: .875rem;
+    color: var(--text-muted);
 }
 
 .navbar-actions {
