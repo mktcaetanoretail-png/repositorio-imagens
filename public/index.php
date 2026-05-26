@@ -44,8 +44,8 @@ if (empty($_SESSION['user']) && !empty($_COOKIE['remember_token'])) {
 }
 
 // Asset version — set APP_VERSION in Vercel dashboard (e.g. git SHA) to bust
-// browser cache on deploy. Falls back to date-based string for local dev.
-define('ASSET_VER', env('APP_VERSION', date('Ymd')));
+// browser cache on deploy. Falls back to hourly string for local/staging.
+define('ASSET_VER', env('APP_VERSION', date('YmdH')));
 
 // Bootstrap router
 $router = new \App\Core\Router();
