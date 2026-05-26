@@ -82,14 +82,17 @@ document.querySelectorAll('[data-delete-location]').forEach(btn => {
         const brandId = this.dataset.brandId;
         const name    = this.dataset.name;
         const count   = parseInt(this.dataset.count, 10);
+        const row     = this.closest('tr');
 
         if (count > 0) {
-            alert(`Não é possível apagar "${name}": tem ${count} foto(s) associada(s).\nElimina primeiro as fotos desta localização.`);
+            window.toast?.error(`Não é possível apagar "${name}": tem ${count} foto(s) associada(s). Elimina primeiro as fotos.`);
             return;
         }
 
-        if (!confirm(`Apagar a localização "${name}"? Esta acção é irreversível.`)) return;
+        const ok = await window.confirm2(`Apagar a localização "${name}"? Esta acção é irreversível.`, 'Apagar localização');
+        if (!ok) return;
 
+        this.disabled = true;
         try {
             const res  = await fetch(`/admin/brands/${brandId}/locations/${id}/delete`, {
                 method : 'POST',
@@ -98,12 +101,28 @@ document.querySelectorAll('[data-delete-location]').forEach(btn => {
             });
             const data = await res.json();
             if (data.success) {
-                location.reload();
+                row.style.transition = 'opacity 0.25s';
+                row.style.opacity    = '0';
+                setTimeout(() => {
+                    row.remove();
+                    const tbody = document.querySelector('.admin-table tbody');
+                    if (tbody && !tbody.querySelector('tr:not([style*="opacity"])')) {
+                        tbody.innerHTML = '<tr><td colspan="4" class="table-empty">Nenhuma localização criada ainda.</td></tr>';
+                    }
+                    const meta = document.querySelector('.brand-header-meta');
+                    if (meta) {
+                        const n = (parseInt(meta.textContent) || 1) - 1;
+                        meta.textContent = `${n} localização${n !== 1 ? 'ões' : ''}`;
+                    }
+                }, 260);
+                window.toast?.success(`Localização "${name}" apagada.`);
             } else {
-                alert('Erro: ' + (data.error || 'Não foi possível apagar a localização.'));
+                this.disabled = false;
+                window.toast?.error(data.error || 'Não foi possível apagar a localização.');
             }
         } catch (e) {
-            alert('Erro de comunicação.');
+            this.disabled = false;
+            window.toast?.error('Erro de comunicação.');
         }
     });
 });

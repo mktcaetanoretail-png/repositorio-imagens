@@ -1175,12 +1175,39 @@ code { font-family: 'SFMono-Regular', Consolas, monospace; font-size: .875em; ba
 
 .lightbox-loading[hidden] { display: none; }
 
+/* ─── Navigation Progress Bar ─────────────────────────────────────────────── */
+#nav-progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    width: 0;
+    background: linear-gradient(90deg, var(--accent), #00B8F1, var(--accent));
+    background-size: 200% 100%;
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    border-radius: 0 2px 2px 0;
+    animation: nav-shimmer 1.5s linear infinite;
+}
+#nav-progress.nav-progress--active { opacity: 1; }
+@keyframes nav-shimmer { 0%{background-position:0 0} 100%{background-position:-200% 0} }
+
 .spinner {
     width: 36px; height: 36px;
     border: 3px solid rgba(255,255,255,.15);
     border-top-color: var(--accent);
     border-radius: 50%;
     animation: spin .8s linear infinite;
+}
+
+/* Inline spinner inside buttons */
+button .spinner, a .spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border-width: 2px;
+    vertical-align: middle;
+    margin-right: 6px;
+    border-top-color: currentColor;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }

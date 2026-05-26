@@ -190,6 +190,80 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+// ─── Navigation progress bar ─────────────────────────────────────────────────
+// Shows a thin animated bar at the top during page-to-page navigation
+// so the user sees instant feedback instead of a blank wait.
+(function () {
+    const bar = document.createElement('div');
+    bar.id = 'nav-progress';
+    document.body.prepend(bar);
+
+    let raf, timer;
+
+    function start() {
+        clearTimeout(timer);
+        cancelAnimationFrame(raf);
+        bar.style.transition = 'none';
+        bar.style.width = '0';
+        bar.classList.add('nav-progress--active');
+        raf = requestAnimationFrame(() => {
+            bar.style.transition = 'width 8s cubic-bezier(0.05, 0.6, 0.4, 1)';
+            bar.style.width = '82%';
+        });
+    }
+
+    function finish() {
+        cancelAnimationFrame(raf);
+        bar.style.transition = 'width 0.15s ease';
+        bar.style.width = '100%';
+        timer = setTimeout(() => {
+            bar.style.transition = 'opacity 0.2s ease, width 0s 0.2s';
+            bar.classList.remove('nav-progress--active');
+            bar.style.width = '0';
+        }, 200);
+    }
+
+    // Start on any navigation click
+    document.addEventListener('click', function (e) {
+        const link = e.target.closest('a[href]');
+        if (!link) return;
+        const href = link.href;
+        // Skip: hash links, external links, blank target, javascript:, download
+        if (!href || link.origin !== location.origin) return;
+        if (link.target === '_blank' || link.download) return;
+        if (link.pathname === location.pathname && link.search === location.search) return;
+        start();
+    });
+
+    // Start on form submit (full-page POSTs)
+    document.addEventListener('submit', function (e) {
+        if (e.defaultPrevented) return;
+        start();
+    });
+
+    // Complete on page show (including back/forward)
+    window.addEventListener('pageshow', finish);
+})();
+
+// ─── Form submit — loading state ─────────────────────────────────────────────
+// Gives instant visual feedback on any form that does a full-page POST.
+// Add data-no-loading to a form to opt out.
+
+document.addEventListener('submit', function (e) {
+    const form = e.target;
+    if (form.dataset.noLoading !== undefined) return;
+    const btn = form.querySelector('[type="submit"]:not([data-no-loading])');
+    if (!btn || btn.disabled) return;
+    const original = btn.innerHTML;
+    btn.disabled   = true;
+    btn.innerHTML  = `<svg class="spinner" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:6px"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>A aguardar…`;
+    // Restore if the page comes back (e.g. validation error via redirect)
+    window.addEventListener('pageshow', () => {
+        btn.disabled  = false;
+        btn.innerHTML = original;
+    }, { once: true });
+});
+
 // ─── Open upload modal from triggers ─────────────────────────────────────────
 
 document.getElementById('openUploadModal')?.addEventListener('click', () => {

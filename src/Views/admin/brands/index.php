@@ -75,25 +75,45 @@ document.querySelectorAll('[data-delete-brand]').forEach(btn => {
     btn.addEventListener('click', async function () {
         const id   = this.dataset.deleteBrand;
         const name = this.dataset.name;
+        const row  = this.closest('tr');
 
-        if (!confirm(`Apagar a marca "${name}"? Esta acção é irreversível.\n\nNota: Só é possível apagar marcas sem imagens associadas.`)) {
-            return;
-        }
+        const ok = await window.confirm2(
+            `Apagar a marca "${name}"? Esta acção é irreversível.\n\nSó é possível apagar marcas sem imagens associadas.`,
+            'Apagar marca'
+        );
+        if (!ok) return;
 
+        this.disabled = true;
         try {
-            const res = await fetch(`/admin/brands/${id}/delete`, {
+            const res  = await fetch(`/admin/brands/${id}/delete`, {
                 method : 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body   : `csrf_token=${encodeURIComponent(window.APP?.csrfToken ?? '')}`,
             });
             const data = await res.json();
             if (data.success) {
-                location.reload();
+                row.style.transition = 'opacity 0.25s';
+                row.style.opacity    = '0';
+                setTimeout(() => {
+                    row.remove();
+                    const tbody = document.querySelector('.admin-table tbody');
+                    if (tbody && !tbody.querySelector('tr:not([style*="opacity"])')) {
+                        tbody.innerHTML = '<tr><td colspan="5" class="table-empty">Nenhuma marca encontrada.</td></tr>';
+                    }
+                    const counter = document.querySelector('.total-count');
+                    if (counter) {
+                        const n = (parseInt(counter.textContent) || 1) - 1;
+                        counter.textContent = `${n} marca${n !== 1 ? 's' : ''}`;
+                    }
+                }, 260);
+                window.toast?.success(`Marca "${name}" apagada.`);
             } else {
-                alert('Erro: ' + (data.error || 'Não foi possível apagar a marca.'));
+                this.disabled = false;
+                window.toast?.error(data.error || 'Não foi possível apagar a marca.');
             }
         } catch (e) {
-            alert('Erro de comunicação.');
+            this.disabled = false;
+            window.toast?.error('Erro de comunicação.');
         }
     });
 });

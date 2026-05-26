@@ -164,16 +164,10 @@
         startBtn.disabled = false;
 
         // Refresh gallery if available
-        setTimeout(() => {
-            window.toast?.success('Upload concluído. A actualizar galeria…');
-            // Trigger gallery refresh
-            if (typeof fetchGallery === 'function') {
-                fetchGallery();
-            } else {
-                // Fallback: reload after short delay
-                setTimeout(() => location.reload(), 1500);
-            }
-        }, 500);
+        window.toast?.success('Upload concluído.');
+        if (typeof fetchGallery === 'function') {
+            fetchGallery();
+        }
     });
 
     function uploadFile(file, id, brandId, locationId) {

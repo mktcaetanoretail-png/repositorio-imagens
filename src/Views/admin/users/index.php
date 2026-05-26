@@ -91,26 +91,49 @@ require_once __DIR__ . '/../../layout/header.php';
 <script>
 document.querySelectorAll('[data-toggle-user]').forEach(btn => {
     btn.addEventListener('click', async function () {
-        const userId = this.dataset.toggleUser;
+        const userId   = this.dataset.toggleUser;
         const isActive = this.dataset.active === '1';
-        const action = isActive ? 'desactivar' : 'activar';
+        const action   = isActive ? 'desactivar' : 'activar';
+        const row      = this.closest('tr');
 
-        if (!confirm(`Tem a certeza que deseja ${action} este utilizador?`)) return;
+        const ok = await window.confirm2(`Tem a certeza que deseja ${action} este utilizador?`);
+        if (!ok) return;
 
+        this.disabled = true;
         try {
-            const res = await fetch(`/admin/users/${userId}/toggle`, {
+            const res  = await fetch(`/admin/users/${userId}/toggle`, {
                 method : 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body   : `csrf_token=${encodeURIComponent(window.APP?.csrfToken ?? '')}`,
             });
             const data = await res.json();
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Erro: ' + (data.error || 'Operação falhada.'));
+            if (!data.success) {
+                this.disabled = false;
+                window.toast?.error(data.error || 'Operação falhada.');
+                return;
             }
+            const nowActive = data.active;
+
+            // Update row style
+            row.classList.toggle('row-inactive', !nowActive);
+
+            // Update status dot
+            const dot = row.querySelector('.status-dot');
+            if (dot) {
+                dot.className = `status-dot ${nowActive ? 'status-active' : 'status-inactive'}`;
+                dot.textContent = nowActive ? 'Activo' : 'Inactivo';
+            }
+
+            // Update button
+            this.className   = `btn btn-xs ${nowActive ? 'btn-warning' : 'btn-success'}`;
+            this.textContent = nowActive ? 'Desactivar' : 'Activar';
+            this.dataset.active = nowActive ? '1' : '0';
+            this.disabled = false;
+
+            window.toast?.success(`Utilizador ${nowActive ? 'activado' : 'desactivado'}.`);
         } catch (e) {
-            alert('Erro de comunicação.');
+            this.disabled = false;
+            window.toast?.error('Erro de comunicação.');
         }
     });
 });
