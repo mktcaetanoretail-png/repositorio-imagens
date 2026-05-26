@@ -40,8 +40,12 @@ class User extends Model
 
     public function lockAccount(int $id, int $minutes = 15): void
     {
+        $minutes = max(1, min(1440, $minutes));
         if ($this->isPgsql()) {
-            $sql = "UPDATE \"users\" SET \"locked_until\" = NOW() + INTERVAL '{$minutes} minutes' WHERE \"id\" = ?";
+            $sql = sprintf(
+                "UPDATE \"users\" SET \"locked_until\" = NOW() + INTERVAL '%d minutes' WHERE \"id\" = ?",
+                $minutes
+            );
             $this->db()->query($sql, [$id]);
         } else {
             $this->db()->query(

@@ -15,11 +15,17 @@ class BrandController extends Controller
         $this->requirePermission('view_images');
 
         $brandModel = new Brand();
-        $brands     = $brandModel->findAll([], 'name ASC');
+        $brands     = $brandModel->findAllWithLocationCounts();
 
-        $locationModel = new Location();
+        $logoBase = __DIR__ . '/../../public/assets/img/brands/';
         foreach ($brands as &$brand) {
-            $brand['location_count'] = count($locationModel->findByBrand($brand['id']));
+            $brand['logo_url'] = null;
+            foreach (['.png', '.svg'] as $ext) {
+                if (file_exists($logoBase . $brand['slug'] . $ext)) {
+                    $brand['logo_url'] = url('assets/img/brands/' . $brand['slug'] . $ext);
+                    break;
+                }
+            }
         }
         unset($brand);
 
@@ -48,13 +54,16 @@ class BrandController extends Controller
         $locationModel = new Location();
         $locations     = $locationModel->findByBrand($brandId);
 
-        $imageModel = new Image();
+        $imageModel    = new Image();
+        $countMap      = $imageModel->countsByBrand($brandId);
+        $previewMap    = $imageModel->previewsByBrand($brandId, 4);
+
         foreach ($locations as &$location) {
-            $location['image_count'] = $imageModel->countByLocation($brandId, $location['id']);
-            $previews = $imageModel->findByLocation($brandId, $location['id']);
+            $locId = (int) $location['id'];
+            $location['image_count']    = $countMap[$locId] ?? 0;
             $location['preview_images'] = array_map(
                 fn($img) => $this->enrichThumb($img, $brand['slug']),
-                array_slice($previews, 0, 4)
+                $previewMap[$locId] ?? []
             );
         }
         unset($location);

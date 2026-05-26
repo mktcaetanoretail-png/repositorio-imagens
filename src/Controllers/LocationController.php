@@ -275,7 +275,12 @@ class LocationController extends Controller
         $mime             = $request->post('mime', 'image/jpeg');
         $slot             = max(1, min(self::MAX_PHOTOS, (int) $request->post('slot', 0)));
 
-        if (!str_starts_with($publicUrl, 'http')) {
+        // Validate the public URL belongs to the configured Supabase bucket (C-3)
+        $supabaseBase = rtrim(env('SUPABASE_URL', ''), '/') . '/storage/v1/object/public/';
+        $bucketName   = env('SUPABASE_BUCKET', 'images');
+        $allowedPrefix = $supabaseBase . $bucketName . '/';
+
+        if (!str_starts_with($publicUrl, 'http') || (env('SUPABASE_URL') && !str_starts_with($publicUrl, $allowedPrefix))) {
             $this->json(['success' => false, 'error' => 'URL inválido.'], 422);
         }
 

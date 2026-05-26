@@ -24,7 +24,7 @@
 <!-- Toast container -->
 <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
-<script src="<?= e(url('assets/js/app.js')) ?>"></script>
+<script src="<?= e(url('assets/js/app.js')) ?>?v=<?= filemtime(__DIR__ . '/../../../public/assets/js/app.js') ?>"></script>
 <?php if ($auth->check()): ?>
 <script>
 window.APP = window.APP || {};

@@ -24,4 +24,19 @@ class Brand extends Model
         $row = $this->db()->query($sql, $params)->fetch();
         return (int) ($row['cnt'] ?? 0) > 0;
     }
+
+    /**
+     * Returns all brands with location_count in a single query (avoids N+1).
+     */
+    public function findAllWithLocationCounts(): array
+    {
+        $stmt = $this->db()->query(
+            'SELECT b.*, COUNT(l.id) AS location_count
+             FROM brands b
+             LEFT JOIN locations l ON l.brand_id = b.id
+             GROUP BY b.id
+             ORDER BY b.name ASC'
+        );
+        return $stmt->fetchAll();
+    }
 }

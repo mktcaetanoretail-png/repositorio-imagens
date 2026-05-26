@@ -118,7 +118,8 @@ class Image extends Model
         // Full-text search on filename
         if (!empty($filters['search'])) {
             $where[]  = "(i.original_filename LIKE ? OR b.name LIKE ? OR l.name LIKE ?)";
-            $term     = '%' . $filters['search'] . '%';
+            $escaped  = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $filters['search']);
+            $term     = '%' . $escaped . '%';
             $params[] = $term;
             $params[] = $term;
             $params[] = $term;
@@ -193,5 +194,57 @@ class Image extends Model
             [$brandId]
         )->fetch();
         return (int) ($row['cnt'] ?? 0);
+    }
+
+    /**
+     * Returns image counts keyed by location_id for all locations of a brand.
+     * Single query — avoids N+1.
+     *
+     * @return array<int, int>  [location_id => count]
+     */
+    public function countsByBrand(int $brandId): array
+    {
+        $rows = $this->db()->query(
+            'SELECT location_id, COUNT(*) AS cnt
+             FROM "images"
+             WHERE brand_id = ? AND deleted_at IS NULL
+             GROUP BY location_id',
+            [$brandId]
+        )->fetchAll();
+
+        $map = [];
+        foreach ($rows as $row) {
+            $map[(int) $row['location_id']] = (int) $row['cnt'];
+        }
+        return $map;
+    }
+
+    /**
+     * Returns up to $limit preview images per location for a given brand.
+     * Single query using window function — avoids N+1.
+     *
+     * @return array<int, list<array>>  [location_id => [image, ...]]
+     */
+    public function previewsByBrand(int $brandId, int $limit = 4): array
+    {
+        $rows = $this->db()->query(
+            "SELECT * FROM (
+                SELECT i.*, u.name AS uploader_name,
+                       ROW_NUMBER() OVER (PARTITION BY i.location_id ORDER BY i.created_at ASC) AS rn
+                FROM images i
+                LEFT JOIN users u ON u.id = i.uploaded_by
+                WHERE i.brand_id = ? AND i.deleted_at IS NULL
+             ) ranked
+             WHERE rn <= {$limit}
+             ORDER BY location_id ASC, rn ASC",
+            [$brandId]
+        )->fetchAll();
+
+        $map = [];
+        foreach ($rows as $row) {
+            $locId = (int) $row['location_id'];
+            $map[$locId][] = $row;
+        }
+        return $map;
     }
 }

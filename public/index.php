@@ -21,9 +21,11 @@ if (env('APP_DEBUG', false)) {
 // Session configuration
 ini_set('session.cookie_httponly', '1');
 ini_set('session.use_strict_mode', '1');
+ini_set('session.cookie_secure', '1');
+ini_set('session.cookie_samesite', 'Lax');
 $lifetime = (int) env('SESSION_LIFETIME', 7200);
 ini_set('session.gc_maxlifetime', (string) $lifetime);
-session_set_cookie_params($lifetime);
+session_set_cookie_params(['lifetime' => $lifetime, 'secure' => true, 'httponly' => true, 'samesite' => 'Lax']);
 
 session_start();
 

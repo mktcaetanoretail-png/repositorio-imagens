@@ -31,13 +31,13 @@ class AuditLog extends Model
 
     public function findRecent(int $limit = 50): array
     {
-        $stmt = $this->db()->query(
+        $limit = max(1, min(500, $limit));
+        $stmt  = $this->db()->query(
             "SELECT al.*, u.name AS user_name, u.email AS user_email
              FROM audit_log al
              LEFT JOIN users u ON u.id = al.user_id
              ORDER BY al.created_at DESC
-             LIMIT ?",
-            [$limit]
+             LIMIT {$limit}"
         );
         return $stmt->fetchAll();
     }

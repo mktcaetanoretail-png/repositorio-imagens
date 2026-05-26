@@ -115,32 +115,32 @@ class DownloadController extends Controller
 
     private function proxyRemoteFile(string $url, string $originalFilename): never
     {
+        // Stream via temp file to avoid buffering entire response in memory
+        $tmpPath = tempnam(sys_get_temp_dir(), 'dl_');
+
+        $fp = fopen($tmpPath, 'wb');
         $ch = curl_init($url);
         curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FILE           => $fp,
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_TIMEOUT        => 30,
         ]);
-        $body   = curl_exec($ch);
+        curl_exec($ch);
         $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $mime   = curl_getinfo($ch, CURLINFO_CONTENT_TYPE) ?: 'application/octet-stream';
+        $error  = curl_error($ch);
         curl_close($ch);
+        fclose($fp);
 
-        if ($body === false || $status !== 200) {
+        if ($error !== '' || $status !== 200) {
+            @unlink($tmpPath);
             http_response_code(502);
             echo 'Erro ao obter o ficheiro.';
             exit;
         }
 
-        while (ob_get_level()) ob_end_clean();
-
-        header('Content-Type: ' . $mime);
-        header('Content-Disposition: attachment; filename="' . addslashes($originalFilename) . '"');
-        header('Content-Length: ' . strlen($body));
-        header('Cache-Control: no-cache');
-        echo $body;
-        exit;
+        $this->streamFile($tmpPath, $originalFilename, $mime, true);
     }
 
     private function resolvePath(string $filePath, string $storageBase, string $brandSlug): string

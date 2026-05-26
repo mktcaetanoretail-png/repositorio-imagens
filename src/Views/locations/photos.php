@@ -7,6 +7,9 @@ $slotNames = [
     3 => 'Foto de Oficina — Exterior',
     4 => 'Foto de Oficina — Interior',
 ];
+$canUploadBase = $auth->can('upload');
+$canDelete     = $auth->can('delete_any') || $auth->can('delete_own');
+$filledCount   = count($images);
 ?>
 
 <div class="brand-header">
@@ -21,7 +24,7 @@ $slotNames = [
             <div class="brand-header-monogram"><?= e(mb_substr($brand['name'], 0, 1)) ?></div>
             <div>
                 <h1 class="brand-header-name"><?= e($location['name']) ?></h1>
-                <p class="brand-header-meta"><?= e(count($images)) ?> / <?= e($max_photos) ?> fotos</p>
+                <p class="brand-header-meta" id="photoCounter"><?= e($filledCount) ?> / <?= e($max_photos) ?> fotos</p>
             </div>
         </div>
     </div>
@@ -39,15 +42,13 @@ $slotNames = [
 
 <div class="brand-content">
 <div class="photo-slots" id="photoSlots">
-    <?php
-    $uploadUrl = url('/brand/' . $brand['id'] . '/location/' . $location['id'] . '/upload');
-    $canUpload = $auth->can('upload') && count($images) < $max_photos; // $images is slot map (assoc array)
-    $canDelete = $auth->can('delete_any') || $auth->can('delete_own');
-    ?>
 
     <?php for ($s = 1; $s <= $max_photos; $s++): ?>
+    <?php
+    $canUploadSlot = $canUploadBase && $filledCount < $max_photos;
+    ?>
     <?php if (isset($images[$s])): $img = $images[$s]; ?>
-    <div class="photo-slot photo-slot--filled" data-image-id="<?= e($img['id']) ?>">
+    <div class="photo-slot photo-slot--filled" data-image-id="<?= e($img['id']) ?>" data-slot="<?= $s ?>">
         <div class="photo-slot-inner">
             <div class="photo-slot-thumb">
                 <img src="<?= e($img['thumb_url']) ?>"
@@ -87,10 +88,10 @@ $slotNames = [
             </div>
         </div>
     </div>
-    <?php elseif ($canUpload): ?>
+    <?php elseif ($canUploadSlot): ?>
     <div class="photo-slot photo-slot--empty" data-slot="<?= $s ?>" id="slot-<?= $s - 1 ?>">
         <input type="file" id="fileInput-<?= $s - 1 ?>" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
-        <div class="photo-slot-uploading" id="uploading-<?= $s - 1 ?>">
+        <div class="photo-slot-uploading" id="uploading-<?= $s - 1 ?>" style="display:none">
             <div class="spinner" style="border-top-color: var(--accent)"></div>
             <span style="font-size:.8rem;color:var(--text-muted)">A carregar...</span>
         </div>
@@ -106,7 +107,7 @@ $slotNames = [
         </div>
     </div>
     <?php else: ?>
-    <div class="photo-slot photo-slot--empty photo-slot--readonly">
+    <div class="photo-slot photo-slot--empty photo-slot--readonly" data-slot="<?= $s ?>">
         <div class="photo-slot-upload-content">
             <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <rect x="3" y="3" width="18" height="18" rx="2"/>
@@ -137,63 +138,52 @@ $slotNames = [
 
 <style>
 .lightbox {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.85);
-    z-index: 1000;
-    align-items: center;
-    justify-content: center;
-    padding: 1.5rem;
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.85); z-index: 1000;
+    align-items: center; justify-content: center; padding: 1.5rem;
 }
 .lightbox--open { display: flex; }
-.lightbox-inner {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    max-width: 90vw;
-    max-height: 90vh;
-    gap: .75rem;
-}
-.lightbox-img {
-    max-width: 100%;
-    max-height: calc(90vh - 3rem);
-    object-fit: contain;
-    border-radius: 8px;
-    box-shadow: 0 8px 40px rgba(0,0,0,.5);
-}
-.lightbox-caption {
-    color: rgba(255,255,255,.75);
-    font-size: .85rem;
-    text-align: center;
-    margin: 0;
-}
+.lightbox-inner { display: flex; flex-direction: column; align-items: center; max-width: 90vw; max-height: 90vh; gap: .75rem; }
+.lightbox-img { max-width: 100%; max-height: calc(90vh - 3rem); object-fit: contain; border-radius: 8px; box-shadow: 0 8px 40px rgba(0,0,0,.5); }
+.lightbox-caption { color: rgba(255,255,255,.75); font-size: .85rem; text-align: center; margin: 0; }
 .lightbox-close {
-    position: fixed;
-    top: 1.25rem;
-    right: 1.25rem;
-    background: rgba(255,255,255,.15);
-    border: none;
-    border-radius: 50%;
-    width: 2.5rem;
-    height: 2.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: #fff;
-    transition: background .15s;
+    position: fixed; top: 1.25rem; right: 1.25rem;
+    background: rgba(255,255,255,.15); border: none; border-radius: 50%;
+    width: 2.5rem; height: 2.5rem; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: #fff; transition: background .15s;
 }
 .lightbox-close:hover { background: rgba(255,255,255,.3); }
 </style>
 
 <script>
 (function () {
-    const uploadUrl        = '<?= e($uploadUrl) ?>';
+    /* ── Config ────────────────────────────────────────── */
+    const uploadUrl        = '<?= e(url('/brand/' . $brand['id'] . '/location/' . $location['id'] . '/upload')) ?>';
     const useDirectUpload  = <?= json_encode($use_direct_upload) ?>;
     const uploadSignUrl    = '<?= e($upload_sign_url) ?>';
     const uploadConfirmUrl = '<?= e($upload_confirm_url) ?>';
     const csrfToken        = document.querySelector('meta[name="csrf-token"]')?.content ?? '';
+    const uploadMaxMb      = <?= (int) env('UPLOAD_MAX_SIZE_MB', 4) ?>;
+    const maxPhotos        = <?= (int) $max_photos ?>;
+    const canUpload        = <?= json_encode($canUploadBase) ?>;
+    const canDelete        = <?= json_encode($canDelete) ?>;
+    const slotNames        = <?= json_encode($slotNames) ?>;
+
+    let filledCount    = <?= (int) $filledCount ?>;
+    let pendingUploads = 0;
+
+    /* ── SVG icon strings ──────────────────────────────── */
+    const SVG_EXPAND   = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>`;
+    const SVG_DOWNLOAD = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>`;
+    const SVG_TRASH    = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`;
+    const SVG_UPLOAD   = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`;
+
+    /* ── Helpers ───────────────────────────────────────── */
+    function esc(s) {
+        return String(s ?? '')
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
 
     function showToast(msg, type) {
         const tc = document.getElementById('toastContainer');
@@ -206,10 +196,169 @@ $slotNames = [
         setTimeout(() => { t.classList.remove('toast--visible'); setTimeout(() => t.remove(), 300); }, 3500);
     }
 
+    function updateCounter() {
+        const el = document.getElementById('photoCounter');
+        if (el) el.textContent = filledCount + ' / ' + maxPhotos + ' fotos';
+    }
+
+    /* ── DOM builders ──────────────────────────────────── */
+    function buildFilledSlot(slotNum, imageId, thumbUrl, optimizedUrl, filename, filesizeHuman, downloadUrl) {
+        const name = slotNames[slotNum] || 'Slot ' + slotNum;
+        const delBtn = canDelete
+            ? `<button class="overlay-btn overlay-btn--danger" title="Eliminar" data-delete-image="${esc(imageId)}" data-filename="${esc(filename)}">${SVG_TRASH}</button>`
+            : '';
+        return `<div class="photo-slot photo-slot--filled" data-image-id="${esc(imageId)}" data-slot="${slotNum}">
+            <div class="photo-slot-inner">
+                <div class="photo-slot-thumb">
+                    <img src="${esc(thumbUrl)}" alt="${esc(filename)}" class="photo-slot-img" loading="lazy">
+                    <div class="photo-slot-overlay">
+                        <button class="overlay-btn" title="Ver imagem" data-lightbox="${esc(optimizedUrl)}" data-caption="${esc(name)}">${SVG_EXPAND}</button>
+                        <a href="${esc(downloadUrl)}" class="overlay-btn" title="Transferir">${SVG_DOWNLOAD}</a>
+                        ${delBtn}
+                    </div>
+                    <span class="photo-slot-number">${slotNum}</span>
+                </div>
+                <div class="photo-slot-meta">
+                    <span class="photo-slot-label">${esc(name)}</span>
+                    <span class="photo-slot-size">${esc(filesizeHuman)}</span>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    function buildEmptySlot(slotNum) {
+        const name = slotNames[slotNum] || 'Slot ' + slotNum;
+        const idx  = slotNum - 1;
+        return `<div class="photo-slot photo-slot--empty" data-slot="${slotNum}" id="slot-${idx}">
+            <input type="file" id="fileInput-${idx}" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+            <div class="photo-slot-uploading" id="uploading-${idx}" style="display:none">
+                <div class="spinner" style="border-top-color:var(--accent)"></div>
+                <span style="font-size:.8rem;color:var(--text-muted)">A carregar...</span>
+            </div>
+            <div class="photo-slot-upload-content" id="uploadContent-${idx}">
+                ${SVG_UPLOAD}
+                <p class="photo-slot-upload-text">${esc(name)}</p>
+                <p class="photo-slot-upload-hint">Clique ou arraste</p>
+                <p class="photo-slot-upload-hint" style="font-size:.72rem;margin-top:.15rem">Máx. ${uploadMaxMb} MB</p>
+            </div>
+        </div>`;
+    }
+
+    /* ── Slot DOM replacement ──────────────────────────── */
+    function replaceSlotWithFilled(slotNum, imageId, thumbUrl, optimizedUrl, filename, filesizeHuman, downloadUrl) {
+        const old = document.querySelector(`.photo-slot[data-slot="${slotNum}"]`);
+        if (!old) return;
+        const html = buildFilledSlot(slotNum, imageId, thumbUrl, optimizedUrl, filename, filesizeHuman, downloadUrl);
+        old.outerHTML = html;
+        const newSlot = document.querySelector(`.photo-slot[data-slot="${slotNum}"]`);
+        if (newSlot) {
+            attachLightboxListeners(newSlot);
+            attachDeleteListeners(newSlot);
+        }
+        filledCount++;
+        updateCounter();
+    }
+
+    function replaceSlotWithEmpty(slotNum) {
+        const old = document.querySelector(`.photo-slot[data-slot="${slotNum}"]`);
+        if (!old) return;
+        if (canUpload && filledCount - 1 < maxPhotos) {
+            old.outerHTML = buildEmptySlot(slotNum);
+            const newSlot = document.querySelector(`.photo-slot[data-slot="${slotNum}"]`);
+            if (newSlot) attachSlotListeners(newSlot);
+        } else {
+            // Readonly placeholder
+            const name = slotNames[slotNum] || 'Slot ' + slotNum;
+            old.outerHTML = `<div class="photo-slot photo-slot--empty photo-slot--readonly" data-slot="${slotNum}">
+                <div class="photo-slot-upload-content">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                    <p class="photo-slot-upload-text">${esc(name)}</p>
+                    <p class="photo-slot-upload-hint">Vazio</p>
+                </div>
+            </div>`;
+        }
+        filledCount--;
+        updateCounter();
+    }
+
+    /* ── Event attachment ──────────────────────────────── */
+    function attachLightboxListeners(container) {
+        container.querySelectorAll('[data-lightbox]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                lbImg.src             = btn.dataset.lightbox;
+                lbCaption.textContent = btn.dataset.caption ?? '';
+                lb.classList.add('lightbox--open');
+                document.body.style.overflow = 'hidden';
+            });
+        });
+    }
+
+    function attachDeleteListeners(container) {
+        container.querySelectorAll('[data-delete-image]').forEach(btn => {
+            btn.addEventListener('click', async function (e) {
+                e.preventDefault();
+                const id       = this.dataset.deleteImage;
+                const filename = this.dataset.filename;
+                const slot     = this.closest('.photo-slot');
+                const slotNum  = slot ? parseInt(slot.dataset.slot, 10) : 0;
+
+                if (!confirm('Eliminar "' + filename + '"? Esta acção pode ser revertida pela administração.')) return;
+
+                this.disabled = true;
+                try {
+                    const res  = await fetch('/image/' + id + '/delete', {
+                        method : 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body   : 'csrf_token=' + encodeURIComponent(csrfToken),
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast('Foto eliminada.', 'success');
+                        if (slotNum) replaceSlotWithEmpty(slotNum);
+                    } else {
+                        showToast(data.error || 'Erro ao eliminar.', 'error');
+                        this.disabled = false;
+                    }
+                } catch (err) {
+                    showToast('Erro de comunicação.', 'error');
+                    this.disabled = false;
+                }
+            });
+        });
+    }
+
+    function attachSlotListeners(slot) {
+        if (!slot.classList.contains('photo-slot--empty') || slot.classList.contains('photo-slot--readonly')) return;
+        const slotNum = parseInt(slot.dataset.slot, 10);
+        const idx     = slotNum - 1;
+        const input   = document.getElementById('fileInput-' + idx);
+
+        slot.addEventListener('click', (e) => {
+            if (!e.target.closest('input')) input?.click();
+        });
+        input?.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) uploadFile(file, idx, slotNum);
+        });
+        slot.addEventListener('dragover',  (e) => { e.preventDefault(); slot.classList.add('drag-over'); });
+        slot.addEventListener('dragleave', ()  => slot.classList.remove('drag-over'));
+        slot.addEventListener('drop', (e) => {
+            e.preventDefault();
+            slot.classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file) uploadFile(file, idx, slotNum);
+        });
+    }
+
+    /* ── Image optimisation ────────────────────────────── */
     async function optimiseImage(file) {
-        const MAX_PX   = 1920;
+        const MAX_PX    = 1920;
         const MAX_BYTES = uploadMaxMb * 1024 * 1024;
-        const MIME     = 'image/jpeg';
+        const MIME      = 'image/jpeg';
 
         return new Promise((resolve, reject) => {
             const url = URL.createObjectURL(file);
@@ -217,32 +366,22 @@ $slotNames = [
             img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Não foi possível ler a imagem.')); };
             img.onload  = () => {
                 URL.revokeObjectURL(url);
-
-                // Calculate new dimensions (never upscale)
-                let w = img.naturalWidth;
-                let h = img.naturalHeight;
+                let w = img.naturalWidth, h = img.naturalHeight;
                 if (w > MAX_PX) { h = Math.round(h * MAX_PX / w); w = MAX_PX; }
 
                 const canvas = document.createElement('canvas');
-                canvas.width  = w;
-                canvas.height = h;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, w, h);
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
 
-                // Always compress at good quality first, then reduce if over limit
                 const qualities = [0.85, 0.75, 0.62, 0.50, 0.40];
                 let idx = 0;
-
                 function tryQuality() {
                     const q = qualities[idx++];
                     canvas.toBlob(blob => {
                         if (!blob) { reject(new Error('Erro ao processar imagem.')); return; }
                         if (blob.size <= MAX_BYTES || idx >= qualities.length) {
-                            const name = file.name.replace(/\.[^.]+$/, '.jpg');
-                            resolve(new File([blob], name, { type: MIME }));
-                        } else {
-                            tryQuality();
-                        }
+                            resolve(new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: MIME }));
+                        } else { tryQuality(); }
                     }, MIME, q);
                 }
                 tryQuality();
@@ -262,68 +401,29 @@ $slotNames = [
     }
 
     async function uploadDirect(file, slotIndex, slotNumber) {
-        // Step 1 — get signed URL from PHP
         const signFd = new FormData();
-        signFd.append('mime',       file.type);
-        signFd.append('slot',       slotNumber);
-        signFd.append('csrf_token', csrfToken);
-
+        signFd.append('mime', file.type); signFd.append('slot', slotNumber); signFd.append('csrf_token', csrfToken);
         const signRes  = await fetch(uploadSignUrl, { method: 'POST', body: signFd });
         const signData = await signRes.json();
         if (!signData.success) throw new Error(signData.error || 'Erro ao iniciar upload.');
-        if (!signData.signed_url || !signData.signed_url.startsWith('http')) {
-            throw new Error('URL de upload inválido: ' + JSON.stringify(signData));
-        }
-
-        // Step 2 — upload directly to Supabase (bypasses Vercel body limit)
         let putRes;
         try {
-            putRes = await fetch(signData.signed_url, {
-                method:  'PUT',
-                headers: { 'Content-Type': file.type },
-                body:    file,
-            });
-        } catch (corsErr) {
-            throw new Error('CORS bloqueado ao enviar para o Supabase Storage. Verifica as definições de CORS no Supabase Dashboard → Storage → Policies. Detalhe: ' + corsErr.message);
-        }
-        if (!putRes.ok) {
-            const errText = await putRes.text().catch(() => '');
-            throw new Error('Supabase Storage recusou o ficheiro (' + putRes.status + '): ' + errText);
-        }
-
-        // Step 3 — get dimensions client-side
+            putRes = await fetch(signData.signed_url, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file });
+        } catch (e) { throw new Error('CORS bloqueado: ' + e.message); }
+        if (!putRes.ok) throw new Error('Supabase recusou (' + putRes.status + '): ' + await putRes.text().catch(() => ''));
         const dims = await getImageDimensions(file);
-
-        // Step 4 — confirm to PHP so it saves to DB
         const confirmFd = new FormData();
-        confirmFd.append('public_url',        signData.public_url);
-        confirmFd.append('filename',          signData.filename);
-        confirmFd.append('original_filename', file.name);
-        confirmFd.append('filesize',          file.size);
-        confirmFd.append('width',             dims.width);
-        confirmFd.append('height',            dims.height);
-        confirmFd.append('mime',              file.type);
-        confirmFd.append('slot',              slotNumber);
-        confirmFd.append('csrf_token',        csrfToken);
-
+        confirmFd.append('public_url', signData.public_url); confirmFd.append('filename', signData.filename);
+        confirmFd.append('original_filename', file.name); confirmFd.append('filesize', file.size);
+        confirmFd.append('width', dims.width); confirmFd.append('height', dims.height);
+        confirmFd.append('mime', file.type); confirmFd.append('slot', slotNumber); confirmFd.append('csrf_token', csrfToken);
         const confirmRes  = await fetch(uploadConfirmUrl, { method: 'POST', body: confirmFd });
         const confirmData = await confirmRes.json();
         if (!confirmData.success) throw new Error(confirmData.error || 'Erro ao registar imagem.');
-
         return confirmData;
     }
 
-    const uploadMaxMb = <?= (int) env('UPLOAD_MAX_SIZE_MB', 4) ?>;
-
-    let pendingUploads    = 0;
-    let successfulUploads = 0;
-
-    function checkReload() {
-        if (pendingUploads === 0 && successfulUploads > 0) {
-            setTimeout(() => location.reload(), 800);
-        }
-    }
-
+    /* ── Upload ────────────────────────────────────────── */
     async function uploadFile(file, slotIndex, slotNumber) {
         const uploading = document.getElementById('uploading-' + slotIndex);
         const content   = document.getElementById('uploadContent-' + slotIndex);
@@ -336,41 +436,43 @@ $slotNames = [
         if (uploading) uploading.style.display = 'flex';
         if (content)   content.style.display   = 'none';
 
-        // Always optimise: resize to max 1920px and compress to JPEG at good quality
         if (file.type.startsWith('image/') && file.type !== 'image/gif') {
             try {
                 file = await optimiseImage(file);
                 if (file.size > uploadMaxMb * 1024 * 1024) {
                     showToast('Não foi possível comprimir a imagem abaixo de ' + uploadMaxMb + ' MB.', 'error');
-                    restoreSlot();
-                    return;
+                    restoreSlot(); return;
                 }
             } catch (e) {
                 showToast(e.message || 'Erro ao optimizar imagem.', 'error');
-                restoreSlot();
-                return;
+                restoreSlot(); return;
             }
         }
 
         pendingUploads++;
-
         try {
             let data;
             if (useDirectUpload) {
                 data = await uploadDirect(file, slotIndex, slotNumber);
             } else {
                 const fd = new FormData();
-                fd.append('image', file);
-                fd.append('slot',  slotNumber);
-                fd.append('csrf_token', csrfToken);
+                fd.append('image', file); fd.append('slot', slotNumber); fd.append('csrf_token', csrfToken);
                 const res = await fetch(uploadUrl, { method: 'POST', body: fd });
-                if (res.status === 413) throw new Error('Ficheiro demasiado grande para o servidor. Máximo: ' + uploadMaxMb + ' MB.');
+                if (res.status === 413) throw new Error('Ficheiro demasiado grande. Máximo: ' + uploadMaxMb + ' MB.');
                 data = await res.json();
             }
 
             if (data.success) {
-                successfulUploads++;
                 showToast('Foto carregada com sucesso.', 'success');
+                replaceSlotWithFilled(
+                    slotNumber,
+                    data.image_id,
+                    data.thumb_url,
+                    data.optimized_url,
+                    data.original_filename,
+                    data.filesize_human,
+                    data.download_url
+                );
             } else {
                 showToast(data.error || 'Erro no upload.', 'error');
                 restoreSlot();
@@ -379,48 +481,13 @@ $slotNames = [
             showToast(e.message || 'Erro de comunicação.', 'error');
             restoreSlot();
         }
-
         pendingUploads--;
-        checkReload();
     }
 
-    document.querySelectorAll('.photo-slot--empty:not(.photo-slot--readonly)').forEach((slot) => {
-        const slotNum = parseInt(slot.dataset.slot, 10);
-        const idx     = slotNum - 1;
-        const input   = document.getElementById('fileInput-' + idx);
-
-        slot.addEventListener('click', (e) => {
-            if (!e.target.closest('input')) input?.click();
-        });
-
-        input?.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) uploadFile(file, idx, slotNum);
-        });
-
-        slot.addEventListener('dragover', (e) => { e.preventDefault(); slot.classList.add('drag-over'); });
-        slot.addEventListener('dragleave', () => slot.classList.remove('drag-over'));
-        slot.addEventListener('drop', (e) => {
-            e.preventDefault();
-            slot.classList.remove('drag-over');
-            const file = e.dataTransfer.files[0];
-            if (file) uploadFile(file, idx, slotNum);
-        });
-    });
-
-    // Lightbox
+    /* ── Lightbox ──────────────────────────────────────── */
     const lb        = document.getElementById('lightbox');
     const lbImg     = document.getElementById('lightboxImg');
     const lbCaption = document.getElementById('lightboxCaption');
-
-    document.querySelectorAll('[data-lightbox]').forEach(btn => {
-        btn.addEventListener('click', () => {
-            lbImg.src             = btn.dataset.lightbox;
-            lbCaption.textContent = btn.dataset.caption ?? '';
-            lb.classList.add('lightbox--open');
-            document.body.style.overflow = 'hidden';
-        });
-    });
 
     lb?.addEventListener('click', (e) => {
         if (e.target === lb || e.target.closest('.lightbox-close')) {
@@ -429,7 +496,6 @@ $slotNames = [
             lbImg.src = '';
         }
     });
-
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && lb?.classList.contains('lightbox--open')) {
             lb.classList.remove('lightbox--open');
@@ -438,31 +504,15 @@ $slotNames = [
         }
     });
 
-    document.querySelectorAll('[data-delete-image]').forEach(btn => {
-        btn.addEventListener('click', async function (e) {
-            e.preventDefault();
-            const id       = this.dataset.deleteImage;
-            const filename = this.dataset.filename;
-            if (!confirm('Eliminar "' + filename + '"? Esta acção pode ser revertida pela administração.')) return;
-
-            try {
-                const res  = await fetch('/image/' + id + '/delete', {
-                    method : 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body   : 'csrf_token=' + encodeURIComponent(csrfToken),
-                });
-                const data = await res.json();
-                if (data.success) {
-                    showToast('Foto eliminada.', 'success');
-                    setTimeout(() => location.reload(), 600);
-                } else {
-                    showToast(data.error || 'Erro ao eliminar.', 'error');
-                }
-            } catch (e) {
-                showToast('Erro de comunicação.', 'error');
-            }
-        });
+    /* ── Init: attach all listeners ───────────────────── */
+    document.querySelectorAll('.photo-slot--filled').forEach(slot => {
+        attachLightboxListeners(slot);
+        attachDeleteListeners(slot);
     });
+    document.querySelectorAll('.photo-slot--empty:not(.photo-slot--readonly)').forEach(slot => {
+        attachSlotListeners(slot);
+    });
+
 })();
 </script>
 

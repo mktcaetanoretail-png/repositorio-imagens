@@ -428,8 +428,9 @@ class AdminController extends Controller
         $locations     = $locationModel->findByBrand($brandId);
 
         $imageModel = new Image();
+        $countMap   = $imageModel->countsByBrand($brandId);
         foreach ($locations as &$location) {
-            $location['image_count'] = $imageModel->countByLocation($brandId, $location['id']);
+            $location['image_count'] = $countMap[(int) $location['id']] ?? 0;
         }
         unset($location);
 
@@ -490,7 +491,7 @@ class AdminController extends Controller
             $this->redirect('/admin/brands/' . $brandId . '/locations/create');
         }
 
-        $locationModel->create([
+        $locationId = $locationModel->create([
             'name'     => $name,
             'slug'     => $slug,
             'brand_id' => $brandId,
@@ -498,7 +499,7 @@ class AdminController extends Controller
 
         $me       = $this->auth->user();
         $auditLog = new AuditLog();
-        $auditLog->log($me['id'], 'location_create', 'location', 0, [
+        $auditLog->log($me['id'], 'location_create', 'location', $locationId, [
             'name'  => $name,
             'brand' => $brand['name'],
         ]);

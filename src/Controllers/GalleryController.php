@@ -119,9 +119,19 @@ class GalleryController extends Controller
         $storageBase = rtrim(env('APP_URL', ''), '/') . '/storage/images';
         $brandSlug   = $image['brand_slug'] ?? slugify($image['brand_name'] ?? 'unknown');
 
-        $image['thumb_url']     = $storageBase . '/' . $brandSlug . '/' . basename($image['thumb_filepath'] ?? '');
-        $image['optimized_url'] = $storageBase . '/' . $brandSlug . '/' . basename($image['filepath'] ?? '');
-        $image['original_url']  = $storageBase . '/' . $brandSlug . '/' . basename($image['original_filepath'] ?? '');
+        $thumbPath     = $image['thumb_filepath'] ?? '';
+        $optimizedPath = $image['filepath'] ?? '';
+        $originalPath  = $image['original_filepath'] ?? '';
+
+        $image['thumb_url']     = str_starts_with($thumbPath, 'http')
+            ? $thumbPath
+            : $storageBase . '/' . $brandSlug . '/' . basename($thumbPath);
+        $image['optimized_url'] = str_starts_with($optimizedPath, 'http')
+            ? $optimizedPath
+            : $storageBase . '/' . $brandSlug . '/' . basename($optimizedPath);
+        $image['original_url']  = str_starts_with($originalPath, 'http')
+            ? $originalPath
+            : $storageBase . '/' . $brandSlug . '/' . basename($originalPath);
         $image['download_url']  = '/download/' . $image['id'];
 
         // Human-readable sizes

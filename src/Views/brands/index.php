@@ -17,20 +17,10 @@
 <?php else: ?>
 <div class="brands-grid">
     <?php foreach ($brands as $brand): ?>
-    <?php
-        $base     = __DIR__ . '/../../../public/assets/img/brands/' . $brand['slug'];
-        $logoUrl  = null;
-        foreach (['.png', '.svg'] as $ext) {
-            if (file_exists($base . $ext)) {
-                $logoUrl = url('assets/img/brands/' . $brand['slug'] . $ext);
-                break;
-            }
-        }
-    ?>
     <a href="<?= url('/brand/' . $brand['id']) ?>" class="brand-card">
         <div class="brand-card-icon">
-            <?php if ($logoUrl): ?>
-            <img src="<?= e($logoUrl) ?>" alt="<?= e($brand['name']) ?>" class="brand-card-logo">
+            <?php if (!empty($brand['logo_url'])): ?>
+            <img src="<?= e($brand['logo_url']) ?>" alt="<?= e($brand['name']) ?>" class="brand-card-logo">
             <?php else: ?>
             <div class="brand-card-monogram"><?= e(mb_strtoupper(mb_substr($brand['name'], 0, 2))) ?></div>
             <?php endif; ?>
