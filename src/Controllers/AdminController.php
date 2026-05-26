@@ -37,7 +37,7 @@ class AdminController extends Controller
 
         $this->render('admin/users/form', [
             'user'        => null,
-            'action'      => '/admin/users/create',
+            'action'      => '/admin/utilizadores/criar',
             'flash_error' => $this->getFlash('error'),
             'csrf_token'  => $this->csrfToken(),
         ]);
@@ -64,7 +64,7 @@ class AdminController extends Controller
         if (!empty($errors)) {
             $this->setFlash('error', implode(' ', $errors));
             $this->setOld(['name' => $name, 'email' => $email, 'role' => $role]);
-            $this->redirect('/admin/users/create');
+            $this->redirect('/admin/utilizadores/criar');
         }
 
         $userModel = new User();
@@ -73,7 +73,7 @@ class AdminController extends Controller
         if ($userModel->findByEmail($email)) {
             $this->setFlash('error', 'Já existe um utilizador com este email.');
             $this->setOld(['name' => $name, 'email' => $email, 'role' => $role]);
-            $this->redirect('/admin/users/create');
+            $this->redirect('/admin/utilizadores/criar');
         }
 
         $id = $userModel->create([
@@ -89,7 +89,7 @@ class AdminController extends Controller
         $auditLog->log($me['id'], 'user_create', 'user', $id, ['email' => $email, 'role' => $role]);
 
         $this->setFlash('success', 'Utilizador criado com sucesso.');
-        $this->redirect('/admin/users');
+        $this->redirect('/admin/utilizadores');
     }
 
     public function userEdit(Request $request, array $params = []): void
@@ -102,12 +102,12 @@ class AdminController extends Controller
 
         if (!$user) {
             $this->setFlash('error', 'Utilizador não encontrado.');
-            $this->redirect('/admin/users');
+            $this->redirect('/admin/utilizadores');
         }
 
         $this->render('admin/users/form', [
             'user'        => $user,
-            'action'      => '/admin/users/' . $id . '/edit',
+            'action'      => '/admin/utilizadores/' . $id . '/editar',
             'flash_error' => $this->getFlash('error'),
             'csrf_token'  => $this->csrfToken(),
         ]);
@@ -124,7 +124,7 @@ class AdminController extends Controller
 
         if (!$user) {
             $this->setFlash('error', 'Utilizador não encontrado.');
-            $this->redirect('/admin/users');
+            $this->redirect('/admin/utilizadores');
         }
 
         $data   = $this->validateUserInput($request);
@@ -135,14 +135,14 @@ class AdminController extends Controller
 
         if (!empty($errors)) {
             $this->setFlash('error', implode(' ', $errors));
-            $this->redirect('/admin/users/' . $id . '/edit');
+            $this->redirect('/admin/utilizadores/' . $id . '/editar');
         }
 
         // Check email unique (excluding self)
         $existing = $userModel->findByEmail($email);
         if ($existing && (int) $existing['id'] !== $id) {
             $this->setFlash('error', 'Já existe outro utilizador com este email.');
-            $this->redirect('/admin/users/' . $id . '/edit');
+            $this->redirect('/admin/utilizadores/' . $id . '/editar');
         }
 
         $updateData = ['name' => $name, 'email' => $email, 'role' => $role];
@@ -151,7 +151,7 @@ class AdminController extends Controller
         if (!empty($password)) {
             if (strlen($password) < 8) {
                 $this->setFlash('error', 'A palavra-passe deve ter pelo menos 8 caracteres.');
-                $this->redirect('/admin/users/' . $id . '/edit');
+                $this->redirect('/admin/utilizadores/' . $id . '/editar');
             }
             $updateData['password_hash'] = password_hash($password, PASSWORD_BCRYPT);
         }
@@ -163,7 +163,7 @@ class AdminController extends Controller
         $auditLog->log($me['id'], 'user_update', 'user', $id, ['email' => $email, 'role' => $role]);
 
         $this->setFlash('success', 'Utilizador actualizado.');
-        $this->redirect('/admin/users');
+        $this->redirect('/admin/utilizadores');
     }
 
     public function userToggle(Request $request, array $params = []): void
@@ -219,7 +219,7 @@ class AdminController extends Controller
 
         $this->render('admin/brands/form', [
             'brand'       => null,
-            'action'      => '/admin/brands/create',
+            'action'      => '/admin/marcas/criar',
             'flash_error' => $this->getFlash('error'),
             'csrf_token'  => $this->csrfToken(),
         ]);

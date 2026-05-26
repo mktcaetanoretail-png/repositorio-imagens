@@ -24,8 +24,8 @@ class LocationController extends Controller
         $this->requirePermission('view_images');
 
         [$brand, $location] = $this->loadBrandLocation(
-            (int) ($params['id']      ?? 0),
-            (int) ($params['loc_id']  ?? 0)
+            $params['brand_slug'] ?? '',
+            $params['loc_slug']   ?? ''
         );
 
         $imageModel = new Image();
@@ -64,7 +64,7 @@ class LocationController extends Controller
 
         $storage          = new SupabaseStorage();
         $useDirectUpload  = false; // Browser→Supabase direct upload blocked by CORS on free plan
-        $locBase          = '/brand/' . $brand['id'] . '/location/' . $location['id'];
+        $locBase          = '/marcas/' . $brand['slug'] . '/' . $location['slug'];
 
         $this->render('locations/photos', [
             'brand'              => $brand,
@@ -78,8 +78,9 @@ class LocationController extends Controller
             'flash_error'        => $this->getFlash('error'),
             'csrf_token'         => $this->csrfToken(),
             'use_direct_upload'  => $useDirectUpload,
-            'upload_sign_url'    => url($locBase . '/upload/sign'),
-            'upload_confirm_url' => url($locBase . '/upload/confirm'),
+            'upload_url'         => url($locBase . '/carregar'),
+            'upload_sign_url'    => url($locBase . '/carregar/assinar'),
+            'upload_confirm_url' => url($locBase . '/carregar/confirmar'),
         ]);
     }
 
@@ -89,8 +90,8 @@ class LocationController extends Controller
         $this->requireCsrf();
 
         [$brand, $location] = $this->loadBrandLocation(
-            (int) ($params['id']      ?? 0),
-            (int) ($params['loc_id']  ?? 0)
+            $params['brand_slug'] ?? '',
+            $params['loc_slug']   ?? ''
         );
 
         $imageModel   = new Image();
@@ -221,8 +222,8 @@ class LocationController extends Controller
         $this->requireCsrf();
 
         [$brand, $location] = $this->loadBrandLocation(
-            (int) ($params['id']     ?? 0),
-            (int) ($params['loc_id'] ?? 0)
+            $params['brand_slug'] ?? '',
+            $params['loc_slug']   ?? ''
         );
 
         $imageModel   = new Image();
@@ -263,8 +264,8 @@ class LocationController extends Controller
         $this->requireCsrf();
 
         [$brand, $location] = $this->loadBrandLocation(
-            (int) ($params['id']     ?? 0),
-            (int) ($params['loc_id'] ?? 0)
+            $params['brand_slug'] ?? '',
+            $params['loc_slug']   ?? ''
         );
 
         $publicUrl        = $request->post('public_url', '');
@@ -384,17 +385,17 @@ class LocationController extends Controller
         return $path !== '' ? $base . '/' . basename($path) : '';
     }
 
-    private function loadBrandLocation(int $brandId, int $locationId): array
+    private function loadBrandLocation(string $brandSlug, string $locSlug): array
     {
-        $brand = (new Brand())->find($brandId);
+        $brand = (new Brand())->findBySlug($brandSlug);
         if (!$brand) {
             http_response_code(404);
             require __DIR__ . '/../Views/errors/404.php';
             exit;
         }
 
-        $location = (new Location())->find($locationId);
-        if (!$location || (int) ($location['brand_id'] ?? 0) !== $brandId) {
+        $location = (new Location())->findBySlug($locSlug);
+        if (!$location || (int) $location['brand_id'] !== (int) $brand['id']) {
             http_response_code(404);
             require __DIR__ . '/../Views/errors/404.php';
             exit;

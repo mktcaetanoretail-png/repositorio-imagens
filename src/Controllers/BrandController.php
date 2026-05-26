@@ -41,9 +41,9 @@ class BrandController extends Controller
     {
         $this->requirePermission('view_images');
 
-        $brandId    = (int) ($params['id'] ?? 0);
+        $slug       = $params['slug'] ?? '';
         $brandModel = new Brand();
-        $brand      = $brandModel->find($brandId);
+        $brand      = $brandModel->findBySlug($slug);
 
         if (!$brand) {
             http_response_code(404);
@@ -52,11 +52,11 @@ class BrandController extends Controller
         }
 
         $locationModel = new Location();
-        $locations     = $locationModel->findByBrand($brandId);
+        $locations     = $locationModel->findByBrand($brand['id']);
 
         $imageModel    = new Image();
-        $countMap      = $imageModel->countsByBrand($brandId);
-        $previewMap    = $imageModel->previewsByBrand($brandId, 4);
+        $countMap      = $imageModel->countsByBrand($brand['id']);
+        $previewMap    = $imageModel->previewsByBrand($brand['id'], 4);
 
         foreach ($locations as &$location) {
             $locId = (int) $location['id'];

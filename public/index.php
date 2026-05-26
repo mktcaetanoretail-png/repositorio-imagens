@@ -57,13 +57,13 @@ $router->get('/logout', 'AuthController@doLogout');
 
 // Brand & Location flow
 $router->get('/', 'BrandController@index');
-$router->get('/brand/:id', 'BrandController@locations');
-$router->get('/brand/:id/location/:loc_id', 'LocationController@photos');
-$router->post('/brand/:id/location/:loc_id/upload', 'LocationController@upload');
-$router->post('/brand/:id/location/:loc_id/upload/sign', 'LocationController@uploadSign');
-$router->post('/brand/:id/location/:loc_id/upload/confirm', 'LocationController@uploadConfirm');
-$router->post('/image/:id/delete', 'LocationController@delete');
-$router->get('/image/:id', 'GalleryController@show');
+$router->get('/marcas/:slug', 'BrandController@locations');
+$router->get('/marcas/:brand_slug/:loc_slug', 'LocationController@photos');
+$router->post('/marcas/:brand_slug/:loc_slug/carregar', 'LocationController@upload');
+$router->post('/marcas/:brand_slug/:loc_slug/carregar/assinar', 'LocationController@uploadSign');
+$router->post('/marcas/:brand_slug/:loc_slug/carregar/confirmar', 'LocationController@uploadConfirm');
+$router->post('/foto/:id/eliminar', 'LocationController@delete');
+$router->get('/foto/:id', 'GalleryController@show');
 
 // Storage — serve uploaded images
 $router->get('/storage/images/:slug/:file', 'StorageController@serve');
@@ -73,34 +73,34 @@ $router->get('/download/:id', 'DownloadController@single');
 $router->post('/download/bulk', 'DownloadController@bulk');
 
 // Converter
-$router->get('/converter', 'ConverterController@index');
-$router->post('/converter/process', 'ConverterController@process');
-$router->post('/converter/estimate', 'ConverterController@estimate');
+$router->get('/conversor', 'ConverterController@index');
+$router->post('/conversor/processar', 'ConverterController@process');
+$router->post('/conversor/estimar', 'ConverterController@estimate');
 
 // Admin — Users
-$router->get('/admin/users', 'AdminController@userList');
-$router->get('/admin/users/create', 'AdminController@userCreate');
-$router->post('/admin/users/create', 'AdminController@userStore');
-$router->get('/admin/users/:id/edit', 'AdminController@userEdit');
-$router->post('/admin/users/:id/edit', 'AdminController@userUpdate');
-$router->post('/admin/users/:id/toggle', 'AdminController@userToggle');
+$router->get('/admin/utilizadores', 'AdminController@userList');
+$router->get('/admin/utilizadores/criar', 'AdminController@userCreate');
+$router->post('/admin/utilizadores/criar', 'AdminController@userStore');
+$router->get('/admin/utilizadores/:id/editar', 'AdminController@userEdit');
+$router->post('/admin/utilizadores/:id/editar', 'AdminController@userUpdate');
+$router->post('/admin/utilizadores/:id/activar', 'AdminController@userToggle');
 
 // Admin — Brands
-$router->get('/admin/brands', 'AdminController@brandList');
-$router->get('/admin/brands/create', 'AdminController@brandCreate');
-$router->post('/admin/brands/create', 'AdminController@brandStore');
-$router->get('/admin/brands/:id/edit', 'AdminController@brandEdit');
-$router->post('/admin/brands/:id/edit', 'AdminController@brandUpdate');
-$router->post('/admin/brands/:id/delete', 'AdminController@brandDelete');
+$router->get('/admin/marcas', 'AdminController@brandList');
+$router->get('/admin/marcas/criar', 'AdminController@brandCreate');
+$router->post('/admin/marcas/criar', 'AdminController@brandStore');
+$router->get('/admin/marcas/:id/editar', 'AdminController@brandEdit');
+$router->post('/admin/marcas/:id/editar', 'AdminController@brandUpdate');
+$router->post('/admin/marcas/:id/eliminar', 'AdminController@brandDelete');
 
 // Admin — Locations
-$router->get('/admin/brands/:id/locations', 'AdminController@locationList');
-$router->get('/admin/brands/:id/locations/create', 'AdminController@locationCreate');
-$router->post('/admin/brands/:id/locations/create', 'AdminController@locationStore');
-$router->post('/admin/brands/:id/locations/:loc_id/delete', 'AdminController@locationDelete');
+$router->get('/admin/marcas/:id/localizacoes', 'AdminController@locationList');
+$router->get('/admin/marcas/:id/localizacoes/criar', 'AdminController@locationCreate');
+$router->post('/admin/marcas/:id/localizacoes/criar', 'AdminController@locationStore');
+$router->post('/admin/marcas/:id/localizacoes/:loc_id/eliminar', 'AdminController@locationDelete');
 
 // Admin — Images
-$router->post('/admin/images/:id/restore', 'AdminController@imageRestore');
-$router->post('/admin/images/:id/hard-delete', 'AdminController@imageHardDelete');
+$router->post('/admin/imagens/:id/restaurar', 'AdminController@imageRestore');
+$router->post('/admin/imagens/:id/eliminar', 'AdminController@imageHardDelete');
 
 $router->dispatch();
