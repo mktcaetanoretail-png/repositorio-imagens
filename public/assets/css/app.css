@@ -63,7 +63,7 @@ code { font-family: 'SFMono-Regular', Consolas, monospace; font-size: .875em; ba
     height: var(--navbar-h);
     background: linear-gradient(135deg, var(--primary) 0%, #123a70 100%);
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    grid-template-columns: 1fr 400px 1fr;
     align-items: center;
     padding: 0 1.25rem;
     gap: 1rem;
@@ -111,7 +111,7 @@ code { font-family: 'SFMono-Regular', Consolas, monospace; font-size: .875em; ba
     transition: var(--transition);
 }
 
-.navbar-search { width: 100%; max-width: 1200px; justify-self: center; }
+.navbar-search { width: 100%; max-width: 400px; justify-self: center; }
 
 .search-input-wrap { position: relative; }
 
