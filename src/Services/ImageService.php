@@ -96,15 +96,18 @@ class ImageService
 
         copy($sourcePath, $outPath);
 
-        $size = @getimagesize($sourcePath);
+        $size = getimagesize($sourcePath);
+        if ($size === false) {
+            throw new \RuntimeException("Ficheiro de imagem inválido ou corrompido: {$sourcePath}");
+        }
 
         return [
             'optimized_path' => $outPath,
             'thumb_path'     => $outPath,
             'filename'       => $outFilename,
             'thumb_filename' => $outFilename,
-            'width'          => $size[0] ?? 0,
-            'height'         => $size[1] ?? 0,
+            'width'          => $size[0],
+            'height'         => $size[1],
         ];
     }
 

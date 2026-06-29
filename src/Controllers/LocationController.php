@@ -277,13 +277,29 @@ class LocationController extends Controller
         $mime             = $request->post('mime', 'image/jpeg');
         $slot             = max(1, min(self::MAX_PHOTOS, (int) $request->post('slot', 0)));
 
-        // Validate the public URL belongs to the configured Supabase bucket (C-3)
-        $supabaseBase = rtrim(env('SUPABASE_URL', ''), '/') . '/storage/v1/object/public/';
-        $bucketName   = env('SUPABASE_BUCKET', 'images');
+        // Validate the public URL belongs to the configured Supabase bucket
+        $supabaseBase  = rtrim(env('SUPABASE_URL', ''), '/') . '/storage/v1/object/public/';
+        $bucketName    = env('SUPABASE_BUCKET', 'images');
         $allowedPrefix = $supabaseBase . $bucketName . '/';
 
-        if (!str_starts_with($publicUrl, 'http') || (env('SUPABASE_URL') && !str_starts_with($publicUrl, $allowedPrefix))) {
+        if (!env('SUPABASE_URL') || !str_starts_with($publicUrl, $allowedPrefix)) {
             $this->json(['success' => false, 'error' => 'URL inválido.'], 422);
+        }
+
+        // Verify the file actually exists in Supabase (HEAD request)
+        $ch = curl_init($publicUrl);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_NOBODY         => true,
+            CURLOPT_TIMEOUT        => 10,
+            CURLOPT_SSL_VERIFYPEER => true,
+        ]);
+        curl_exec($ch);
+        $httpStatus = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($httpStatus !== 200) {
+            $this->json(['success' => false, 'error' => 'Ficheiro não encontrado no storage.'], 422);
         }
 
         $user   = $this->auth->user();
