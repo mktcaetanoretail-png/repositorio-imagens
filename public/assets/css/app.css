@@ -2144,6 +2144,11 @@ body.lightbox-open { overflow: hidden; }
     top: calc(var(--navbar-h) + 1rem);
 }
 
+.brand-sidebar-nav {
+    max-height: 420px;
+    overflow-y: auto;
+}
+
 .brand-sidebar-header {
     padding: .75rem 1rem;
     border-bottom: 1px solid var(--border);

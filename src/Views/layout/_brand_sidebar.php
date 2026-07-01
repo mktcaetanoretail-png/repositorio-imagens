@@ -21,7 +21,7 @@ $currentLocationId = $currentLocationId ?? null;
     <?php if (empty($brandLocations)): ?>
     <div class="brand-sidebar-empty">Nenhuma localização</div>
     <?php else: ?>
-    <nav>
+    <nav class="brand-sidebar-nav">
         <?php foreach ($brandLocations as $loc): ?>
         <?php $isActive = $currentLocationId !== null && (int) $loc['id'] === (int) $currentLocationId; ?>
         <a href="<?= url('/marcas/' . $brand['slug'] . '/' . $loc['slug']) ?>"
