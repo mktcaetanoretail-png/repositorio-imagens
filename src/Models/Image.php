@@ -117,7 +117,7 @@ class Image extends Model
 
         // Full-text search on filename
         if (!empty($filters['search'])) {
-            $where[]  = "(i.original_filename LIKE ? OR b.name LIKE ? OR l.name LIKE ?)";
+            $where[]  = "(i.original_filename ILIKE ? OR b.name ILIKE ? OR l.name ILIKE ?)";
             $escaped  = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $filters['search']);
             $term     = '%' . $escaped . '%';
             $params[] = $term;

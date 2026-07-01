@@ -25,13 +25,14 @@ class Location extends Model
      */
     public function search(string $query, int $limit = 10): array
     {
-        $like = '%' . $query . '%';
+        $escaped = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $query);
+        $like    = '%' . $escaped . '%';
         return $this->db()->query(
             'SELECT l.slug AS loc_slug, l.name AS loc_name,
                     b.slug AS brand_slug, b.name AS brand_name
              FROM "locations" l
              JOIN "brands" b ON b.id = l.brand_id
-             WHERE l.name LIKE ? OR b.name LIKE ?
+             WHERE l.name ILIKE ? OR b.name ILIKE ?
              ORDER BY b.name ASC, l.name ASC
              LIMIT ' . (int) $limit,
             [$like, $like]
