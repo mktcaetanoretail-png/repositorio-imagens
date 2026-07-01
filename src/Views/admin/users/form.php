@@ -6,13 +6,11 @@ require_once __DIR__ . '/../../layout/header.php';
 
 <div class="page-header">
     <div class="page-header-left">
-        <a href="<?= url('/admin/utilizadores') ?>" class="back-link">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="m15 18-6-6 6-6"/>
-            </svg>
-            Utilizadores
-        </a>
         <h1 class="page-title"><?= $isEdit ? 'Editar utilizador' : 'Novo utilizador' ?></h1>
+        <span class="total-count"><?= $isEdit ? e($user['name']) : 'Novo registo' ?></span>
+    </div>
+    <div class="page-header-right">
+        <a href="<?= url('/admin/utilizadores') ?>" class="btn btn-secondary">Voltar aos utilizadores</a>
     </div>
 </div>
 
