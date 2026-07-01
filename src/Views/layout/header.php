@@ -176,15 +176,6 @@
                 </svg>
                 <span>Repositório</span>
             </a>
-            <?php if ($auth->can('convert')): ?>
-            <a href="<?= url('/conversor') ?>" class="sidebar-item <?= strpos($_SERVER['REQUEST_URI'] ?? '', '/conversor') === 0 ? 'active' : '' ?>">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 2a10 10 0 0 1 7.38 16.74M12 22a10 10 0 0 1-7.38-16.74"/>
-                    <polyline points="21 2 16 7 11 2"/><polyline points="3 22 8 17 13 22"/>
-                </svg>
-                <span>Conversor</span>
-            </a>
-            <?php endif; ?>
             <?php if ($auth->can('manage_users')): ?>
             <div class="sidebar-section-title">Administração</div>
             <a href="<?= url('/admin/utilizadores') ?>" class="sidebar-item <?= strpos($_SERVER['REQUEST_URI'] ?? '', '/admin/utilizadores') === 0 ? 'active' : '' ?>">
