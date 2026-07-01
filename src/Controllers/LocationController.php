@@ -402,8 +402,8 @@ class LocationController extends Controller
             exit;
         }
 
-        $location = (new Location())->findBySlug($locSlug);
-        if (!$location || (int) $location['brand_id'] !== (int) $brand['id']) {
+        $location = (new Location())->findBySlugAndBrand($locSlug, (int) $brand['id']);
+        if (!$location) {
             http_response_code(404);
             require __DIR__ . '/../Views/errors/404.php';
             exit;

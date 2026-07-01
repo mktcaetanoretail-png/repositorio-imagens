@@ -6,9 +6,18 @@ class Location extends Model
 {
     protected string $table = 'locations';
 
-    public function findBySlug(string $slug): ?array
+    /**
+     * Finds a location by slug scoped to a brand. Location slugs are only
+     * unique per brand (e.g. "Cascais" exists under several brands), so
+     * looking up by slug alone can return the wrong brand's location.
+     */
+    public function findBySlugAndBrand(string $slug, int $brandId): ?array
     {
-        return $this->findBy('slug', $slug);
+        $row = $this->db()->query(
+            'SELECT * FROM "locations" WHERE "slug" = ? AND "brand_id" = ?',
+            [$slug, $brandId]
+        )->fetch();
+        return $row ?: null;
     }
 
     public function findByBrand(int $brandId): array
