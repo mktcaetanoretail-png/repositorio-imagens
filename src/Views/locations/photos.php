@@ -4,7 +4,7 @@
 $slotNames = [
     1 => 'Foto da Fachada',
     2 => 'Foto do Showroom',
-    3 => 'Foto de Oficina — Exterior',
+    3 => 'Foto da Receção de Oficina',
     4 => 'Foto de Oficina — Interior',
 ];
 $canUploadBase = $auth->can('upload');
