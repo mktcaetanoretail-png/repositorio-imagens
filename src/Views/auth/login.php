@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar sessão — <?= e(env('APP_NAME', 'Repositório de Imagens')) ?></title>
+    <title>Iniciar sessão — Repositório Digital</title>
     <link rel="icon" type="image/svg+xml" href="https://assets.caetano.pt/img/favicon.svg">
     <link rel="stylesheet" href="<?= e(url('assets/css/app.css')) ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,12 +13,8 @@
 
 <div class="login-layout">
     <div class="login-brand">
-        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-            <rect width="48" height="48" rx="10" fill="#1B6CB2"/>
-            <path d="M8 34L17 21l7 9 5.5-7L38 34H8z" fill="white" opacity=".9"/>
-            <circle cx="33" cy="15" r="5" fill="white" opacity=".9"/>
-        </svg>
-        <h1><?= e(env('APP_NAME', 'Repositório de Imagens')) ?></h1>
+        <img src="<?= e(url('assets/img/caetano-logo-white.svg')) ?>" alt="Caetano" class="login-brand-logo">
+        <h1>Repositório Digital</h1>
         <p>Caetano Automotive Portugal</p>
     </div>
 
