@@ -1691,8 +1691,10 @@ body.lightbox-open { overflow: hidden; }
     filter: brightness(0);
 }
 
-/* Spoticar keeps its original brand colours instead of the forced-black logo */
-.brand-card-logo[src*="spoticar"] {
+/* Spoticar and Caetano Parts keep their original brand colours instead of
+   the forced-black logo */
+.brand-card-logo[src*="spoticar"],
+.brand-card-logo[src*="caetano-parts"] {
     filter: none;
 }
 
