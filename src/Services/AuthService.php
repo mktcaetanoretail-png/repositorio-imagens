@@ -116,32 +116,28 @@ class AuthService
 
     public function user(): ?array
     {
-        // AUTH DISABLED — return guest admin until re-enabled
-        return $_SESSION['user'] ?? [
-            'id'         => 0,
-            'name'       => 'Utilizador',
-            'email'      => '',
-            'role'       => 'admin',
-            'photo_path' => null,
-        ];
+        return $_SESSION['user'] ?? null;
     }
 
     public function check(): bool
     {
-        // AUTH DISABLED
-        return true;
+        return !empty($_SESSION['user']);
     }
 
     public function can(string $action): bool
     {
-        // AUTH DISABLED
-        return true;
+        $user = $this->user();
+        if (!$user) {
+            return false;
+        }
+        $allowedRoles = self::PERMISSIONS[$action] ?? [];
+        return in_array($user['role'], $allowedRoles, true);
     }
 
     public function isAdmin(): bool
     {
-        // AUTH DISABLED
-        return true;
+        $user = $this->user();
+        return $user !== null && $user['role'] === 'admin';
     }
 
     public function generateCsrf(): string

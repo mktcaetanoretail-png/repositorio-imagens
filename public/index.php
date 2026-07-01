@@ -35,10 +35,11 @@ if (empty($_SESSION['user']) && !empty($_COOKIE['remember_token'])) {
     $user = $userModel->findByRememberToken($_COOKIE['remember_token']);
     if ($user && $user['active']) {
         $_SESSION['user'] = [
-            'id'    => $user['id'],
-            'name'  => $user['name'],
-            'email' => $user['email'],
-            'role'  => $user['role'],
+            'id'         => $user['id'],
+            'name'       => $user['name'],
+            'email'      => $user['email'],
+            'role'       => $user['role'],
+            'photo_path' => $user['photo_path'] ?? null,
         ];
     }
 }

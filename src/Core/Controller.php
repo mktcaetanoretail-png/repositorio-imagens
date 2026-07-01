@@ -84,17 +84,70 @@ abstract class Controller
 
     protected function requireAuth(): void
     {
-        // AUTH DISABLED FOR TESTING — re-enable before production
+        if ($this->auth->check()) {
+            return;
+        }
+
+        if ($this->wantsJson()) {
+            $this->json(['success' => false, 'error' => 'Sessão expirada. Inicie sessão novamente.'], 401);
+        }
+
+        $this->redirect('/login');
     }
 
     protected function requirePermission(string $action): void
     {
-        // AUTH DISABLED FOR TESTING — re-enable before production
+        $this->requireAuth();
+
+        if ($this->auth->can($action)) {
+            return;
+        }
+
+        if ($this->wantsJson()) {
+            $this->json(['success' => false, 'error' => 'Sem permissão para esta acção.'], 403);
+        }
+
+        http_response_code(403);
+        require __DIR__ . '/../Views/errors/403.php';
+        exit;
     }
 
     protected function requireCsrf(): void
     {
-        // AUTH DISABLED FOR TESTING — re-enable before production
+        if ($this->csrfVerify()) {
+            return;
+        }
+
+        if ($this->wantsJson()) {
+            $this->json(['success' => false, 'error' => 'Sessão expirada. Recarregue a página e tente novamente.'], 419);
+        }
+
+        $this->setFlash('error', 'Sessão expirada. Por favor tente novamente.');
+        $this->back();
+    }
+
+    /**
+     * Whether the current request expects a JSON response (AJAX/fetch calls)
+     * rather than a full page — used to decide between redirecting and
+     * returning a JSON error when auth/CSRF checks fail. A real <form>
+     * submission is a top-level navigation, which browsers mark with
+     * "Sec-Fetch-Mode: navigate"; fetch() calls never use that value, so
+     * this reliably distinguishes AJAX endpoints from page-based forms
+     * without needing every fetch() call site to set a custom header.
+     */
+    protected function wantsJson(): bool
+    {
+        $fetchMode = $this->request->header('Sec-Fetch-Mode');
+        if ($fetchMode !== null && $fetchMode !== '') {
+            return $fetchMode !== 'navigate';
+        }
+
+        if ($this->request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return true;
+        }
+
+        $accept = $this->request->header('Accept') ?? '';
+        return str_contains($accept, 'application/json');
     }
 
     protected function setFlash(string $type, string $message): void
