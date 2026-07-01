@@ -18,6 +18,30 @@ if (env('APP_DEBUG', false)) {
     error_reporting(0);
 }
 
+// Safety net for anything not caught by Router::handle() (e.g. errors during
+// session handling or controller construction, which run before routing).
+// Without this, an uncaught error here produces no valid HTTP response at
+// all — the browser sees a dropped connection and reports a generic
+// "Failed to fetch" instead of a real error message.
+set_exception_handler(function (\Throwable $e) {
+    error_log('Uncaught exception: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine() . "\n" . $e->getTraceAsString());
+    if (!headers_sent()) {
+        http_response_code(500);
+        $accept = $_SERVER['HTTP_ACCEPT'] ?? '';
+        if (($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'XMLHttpRequest' || str_contains($accept, 'application/json')) {
+            header('Content-Type: application/json; charset=UTF-8');
+            echo json_encode(['success' => false, 'error' => 'Erro interno do servidor.']);
+            return;
+        }
+    }
+    $viewFile = __DIR__ . '/../src/Views/errors/500.php';
+    if (file_exists($viewFile)) {
+        require $viewFile;
+    } else {
+        echo 'Internal Server Error';
+    }
+});
+
 // Session configuration
 ini_set('session.cookie_httponly', '1');
 ini_set('session.use_strict_mode', '1');
