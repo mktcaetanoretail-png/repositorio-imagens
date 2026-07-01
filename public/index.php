@@ -56,6 +56,10 @@ $router->get('/login', 'AuthController@showLogin');
 $router->post('/login', 'AuthController@doLogin');
 $router->get('/logout', 'AuthController@doLogout');
 
+// Profile (self-service)
+$router->get('/perfil', 'ProfileController@edit');
+$router->post('/perfil', 'ProfileController@update');
+
 // Brand & Location flow
 $router->get('/', 'BrandController@index');
 $router->get('/marcas/:slug', 'BrandController@locations');
