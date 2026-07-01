@@ -9,6 +9,9 @@ require_once __DIR__ . '/../../layout/header.php';
         <span class="total-count"><?= e(count($brands)) ?> marcas</span>
     </div>
     <div class="page-header-right">
+        <a href="<?= url('/admin/localizacoes/importar') ?>" class="btn btn-secondary">
+            Importar localizações
+        </a>
         <a href="<?= url('/admin/marcas/criar') ?>" class="btn btn-primary">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                 <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>

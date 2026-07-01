@@ -102,6 +102,11 @@ $router->get('/admin/marcas/:id/localizacoes/criar', 'AdminController@locationCr
 $router->post('/admin/marcas/:id/localizacoes/criar', 'AdminController@locationStore');
 $router->post('/admin/marcas/:id/localizacoes/:loc_id/eliminar', 'AdminController@locationDelete');
 
+// Admin — Bulk Location Import
+$router->get('/admin/localizacoes/importar', 'AdminController@locationImportForm');
+$router->post('/admin/localizacoes/importar', 'AdminController@locationImportPreview');
+$router->post('/admin/localizacoes/importar/confirmar', 'AdminController@locationImportConfirm');
+
 // Admin — Images
 $router->post('/admin/imagens/:id/restaurar', 'AdminController@imageRestore');
 $router->post('/admin/imagens/:id/eliminar', 'AdminController@imageHardDelete');

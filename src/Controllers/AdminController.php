@@ -553,6 +553,192 @@ class AdminController extends Controller
         $this->json(['success' => true]);
     }
 
+    // ─── Bulk Location Import ───────────────────────────────────────────────────
+
+    public function locationImportForm(Request $request, array $params = []): void
+    {
+        $this->requirePermission('manage_brands');
+
+        $this->render('admin/locations/import', [
+            'flash_error' => $this->getFlash('error'),
+            'csrf_token'  => $this->csrfToken(),
+        ]);
+    }
+
+    public function locationImportPreview(Request $request, array $params = []): void
+    {
+        $this->requirePermission('manage_brands');
+        $this->requireCsrf();
+
+        $raw = $request->post('data', '');
+
+        if (trim($raw) === '') {
+            $this->setFlash('error', 'Cole a lista de marcas e localizações antes de continuar.');
+            $this->redirect('/admin/localizacoes/importar');
+        }
+
+        $rows = $this->parseLocationImportRows($raw);
+
+        $this->render('admin/locations/import_preview', [
+            'rows'       => $rows,
+            'raw'        => $raw,
+            'csrf_token' => $this->csrfToken(),
+        ]);
+    }
+
+    public function locationImportConfirm(Request $request, array $params = []): void
+    {
+        $this->requirePermission('manage_brands');
+        $this->requireCsrf();
+
+        $raw  = $request->post('data', '');
+        $rows = $this->parseLocationImportRows($raw);
+
+        $locationModel = new Location();
+        $me            = $this->auth->user();
+        $auditLog      = new AuditLog();
+
+        $created = 0;
+        $skipped = 0;
+
+        foreach ($rows as $row) {
+            if ($row['status'] !== 'ok') {
+                $skipped++;
+                continue;
+            }
+
+            $locationId = $locationModel->create([
+                'name'     => $row['location_name'],
+                'slug'     => $row['location_slug'],
+                'brand_id' => $row['brand_id'],
+            ]);
+
+            $auditLog->log($me['id'], 'location_create', 'location', $locationId, [
+                'name'  => $row['location_name'],
+                'brand' => $row['brand_name'],
+            ]);
+
+            $created++;
+        }
+
+        $this->setFlash(
+            'success',
+            "Importação concluída: {$created} localização(ões) criada(s), {$skipped} ignorada(s)."
+        );
+        $this->redirect('/admin/marcas');
+    }
+
+    /**
+     * Parses pasted "Marca - Localização" text into rows with a match status.
+     * Does not touch the database except for read-only duplicate checks.
+     */
+    private function parseLocationImportRows(string $raw): array
+    {
+        $brandModel = new Brand();
+        $brands     = $brandModel->findAll([], 'name ASC');
+
+        $brandsByKey = [];
+        foreach ($brands as $b) {
+            $brandsByKey[mb_strtolower(trim($b['name']))] = $b;
+        }
+
+        $locationModel = new Location();
+        $lines         = preg_split('/\r\n|\r|\n/', $raw);
+        $rows          = [];
+        $seen          = [];
+
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+
+            $parts = preg_split('/[\t ]+-[\t ]+/u', $line, 2);
+            if (count($parts) !== 2) {
+                $rows[] = [
+                    'raw'     => $line,
+                    'status'  => 'invalid',
+                    'message' => 'Formato inválido (esperado "Marca - Localização").',
+                ];
+                continue;
+            }
+
+            [$brandTextRaw, $locationName] = $parts;
+            $brandTextRaw = trim($brandTextRaw);
+            $locationName = trim($locationName);
+
+            if (mb_strtolower($brandTextRaw) === 'marca') {
+                continue; // header row
+            }
+
+            $candidates = [mb_strtolower($brandTextRaw)];
+            if (preg_match('/^caetano\s+(.+)$/iu', $brandTextRaw, $m)) {
+                $candidates[] = mb_strtolower(trim($m[1]));
+            }
+
+            $brand = null;
+            foreach ($candidates as $candidate) {
+                if (isset($brandsByKey[$candidate])) {
+                    $brand = $brandsByKey[$candidate];
+                    break;
+                }
+            }
+
+            if (!$brand) {
+                $rows[] = [
+                    'raw'           => $line,
+                    'brand_text'    => $brandTextRaw,
+                    'location_text' => $locationName,
+                    'status'        => 'no_brand',
+                    'message'       => 'Marca não encontrada.',
+                ];
+                continue;
+            }
+
+            if ($locationName === '') {
+                $rows[] = [
+                    'raw'        => $line,
+                    'brand_text' => $brandTextRaw,
+                    'brand_name' => $brand['name'],
+                    'status'     => 'invalid',
+                    'message'    => 'Nome de localização em falta.',
+                ];
+                continue;
+            }
+
+            $slug   = slugify($locationName);
+            $dupKey = $brand['id'] . '|' . $slug;
+
+            if (isset($seen[$dupKey]) || $locationModel->slugExistsForBrand($slug, (int) $brand['id'])) {
+                $rows[] = [
+                    'raw'           => $line,
+                    'brand_text'    => $brandTextRaw,
+                    'brand_name'    => $brand['name'],
+                    'location_text' => $locationName,
+                    'status'        => 'duplicate',
+                    'message'       => 'Já existe esta localização para a marca.',
+                ];
+                continue;
+            }
+
+            $seen[$dupKey] = true;
+
+            $rows[] = [
+                'raw'           => $line,
+                'brand_text'    => $brandTextRaw,
+                'brand_id'      => (int) $brand['id'],
+                'brand_name'    => $brand['name'],
+                'location_text' => $locationName,
+                'location_name' => $locationName,
+                'location_slug' => $slug,
+                'status'        => 'ok',
+                'message'       => 'Pronto a criar.',
+            ];
+        }
+
+        return $rows;
+    }
+
     // ─── Helpers ──────────────────────────────────────────────────────────────
 
     private function validateUserInput(Request $request): array
