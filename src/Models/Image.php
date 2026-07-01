@@ -175,6 +175,15 @@ class Image extends Model
         return (int) ($row['cnt'] ?? 0);
     }
 
+    public function countTrashedByLocation(int $brandId, int $locationId): int
+    {
+        $row = $this->db()->query(
+            'SELECT COUNT(*) AS cnt FROM "images" WHERE "brand_id" = ? AND "location_id" = ? AND "deleted_at" IS NOT NULL',
+            [$brandId, $locationId]
+        )->fetch();
+        return (int) ($row['cnt'] ?? 0);
+    }
+
     public function findByLocation(int $brandId, int $locationId): array
     {
         return $this->db()->query(

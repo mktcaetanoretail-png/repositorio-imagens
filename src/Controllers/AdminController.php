@@ -533,6 +533,15 @@ class AdminController extends Controller
             ], 422);
         }
 
+        $trashedCount = $imageModel->countTrashedByLocation($brandId, $locationId);
+
+        if ($trashedCount > 0) {
+            $this->json([
+                'success' => false,
+                'error'   => "Não é possível apagar: tem {$trashedCount} imagem(ns) na lixeira associada(s). Elimine-as permanentemente na Lixeira antes de apagar a localização.",
+            ], 422);
+        }
+
         $locationModel->hardDelete($locationId);
 
         $me       = $this->auth->user();
