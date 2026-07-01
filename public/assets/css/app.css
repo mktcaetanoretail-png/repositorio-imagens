@@ -801,6 +801,7 @@ code { font-family: 'SFMono-Regular', Consolas, monospace; font-size: .875em; ba
 .image-card:hover .image-card-overlay { opacity: 1; }
 
 .overlay-btn {
+    position: relative;
     width: 38px; height: 38px;
     background: rgba(255,255,255,.15);
     border-radius: 50%;
@@ -814,6 +815,14 @@ code { font-family: 'SFMono-Regular', Consolas, monospace; font-size: .875em; ba
 }
 
 .overlay-btn:hover { background: rgba(255,255,255,.28); text-decoration: none; color: #fff; }
+
+.photo-slot-date-input {
+    position: absolute;
+    width: 1px; height: 1px;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
 
 /* ─── Select checkbox ─ */
 .image-select-label {
@@ -1886,6 +1895,16 @@ body.lightbox-open { overflow: hidden; }
 }
 
 .photo-slot-size { font-size: .72rem; color: var(--text-muted); flex-shrink: 0; }
+
+.photo-slot-meta-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: .1rem;
+    flex-shrink: 0;
+}
+
+.photo-slot-date { font-size: .68rem; color: var(--text-muted); white-space: nowrap; }
 
 .photo-slot--empty {
     aspect-ratio: 4/3;

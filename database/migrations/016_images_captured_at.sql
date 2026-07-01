@@ -1,0 +1,1 @@
+ALTER TABLE images ADD COLUMN IF NOT EXISTS captured_at DATE NULL;

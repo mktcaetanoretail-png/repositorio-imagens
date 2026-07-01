@@ -394,6 +394,44 @@ class LocationController extends Controller
         $this->json(['success' => true]);
     }
 
+    public function updateCapturedDate(Request $request, array $params = []): void
+    {
+        $this->requirePermission('upload');
+        $this->requireCsrf();
+
+        $id         = (int) ($params['id'] ?? 0);
+        $imageModel = new Image();
+        $image      = $imageModel->findWithRelations($id);
+
+        if (!$image || $image['deleted_at'] !== null) {
+            $this->json(['success' => false, 'error' => 'Imagem não encontrada.'], 404);
+        }
+
+        $date = trim($request->post('captured_at', ''));
+
+        if ($date === '') {
+            $imageModel->update($id, ['captured_at' => null]);
+            $this->json(['success' => true, 'captured_at' => null, 'captured_at_human' => '']);
+        }
+
+        $parsed = \DateTime::createFromFormat('Y-m-d', $date);
+        if (!$parsed || $parsed->format('Y-m-d') !== $date) {
+            $this->json(['success' => false, 'error' => 'Data inválida.'], 422);
+        }
+
+        $imageModel->update($id, ['captured_at' => $date]);
+
+        $auditLog = new AuditLog();
+        $auditLog->log($this->auth->user()['id'], 'image_captured_date_update', 'image', $id, [
+            'captured_at' => $date,
+        ]);
+
+        $this->json([
+            'success'           => true,
+            'captured_at'       => $date,
+            'captured_at_human' => $parsed->format('d/m/Y'),
+        ]);
+    }
 
     private function loadBrandLocation(string $brandSlug, string $locSlug): array
     {

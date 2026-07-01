@@ -96,6 +96,7 @@ $router->post('/marcas/:brand_slug/:loc_slug/carregar', 'LocationController@uplo
 $router->post('/marcas/:brand_slug/:loc_slug/carregar/assinar', 'LocationController@uploadSign');
 $router->post('/marcas/:brand_slug/:loc_slug/carregar/confirmar', 'LocationController@uploadConfirm');
 $router->post('/foto/:id/eliminar', 'LocationController@delete');
+$router->post('/foto/:id/data', 'LocationController@updateCapturedDate');
 $router->get('/foto/:id', 'GalleryController@show');
 
 // Search autocomplete

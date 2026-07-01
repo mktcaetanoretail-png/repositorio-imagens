@@ -75,6 +75,17 @@ $filledCount   = count($images);
                             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
                         </svg>
                     </a>
+                    <?php if ($canUploadBase): ?>
+                    <button class="overlay-btn" title="Definir data de captação" data-set-date="<?= e($img['id']) ?>">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <rect x="3" y="4" width="18" height="18" rx="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                        <input type="date" class="photo-slot-date-input" value="<?= e($img['captured_at'] ?? '') ?>">
+                    </button>
+                    <?php endif; ?>
                     <?php if ($canDelete): ?>
                     <button class="overlay-btn overlay-btn--danger" title="Eliminar"
                             data-delete-image="<?= e($img['id']) ?>"
@@ -90,7 +101,12 @@ $filledCount   = count($images);
             </div>
             <div class="photo-slot-meta">
                 <span class="photo-slot-label"><?= e($slotNames[$s] ?? 'Slot ' . $s) ?></span>
-                <span class="photo-slot-size"><?= e($img['filesize_human']) ?></span>
+                <div class="photo-slot-meta-right">
+                    <span class="photo-slot-size"><?= e($img['filesize_human']) ?></span>
+                    <span class="photo-slot-date" data-date-for="<?= e($img['id']) ?>">
+                        <?= !empty($img['captured_at']) ? e(date('d/m/Y', strtotime($img['captured_at']))) : 'Sem data' ?>
+                    </span>
+                </div>
             </div>
         </div>
     </div>
@@ -183,6 +199,7 @@ $filledCount   = count($images);
     const SVG_DOWNLOAD = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg>`;
     const SVG_TRASH    = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`;
     const SVG_UPLOAD   = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`;
+    const SVG_CALENDAR = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`;
 
     /* ── Helpers ───────────────────────────────────────── */
     function esc(s) {
@@ -213,6 +230,9 @@ $filledCount   = count($images);
         const delBtn = canDelete
             ? `<button class="overlay-btn overlay-btn--danger" title="Eliminar" data-delete-image="${esc(imageId)}" data-filename="${esc(filename)}">${SVG_TRASH}</button>`
             : '';
+        const dateBtn = canUpload
+            ? `<button class="overlay-btn" title="Definir data de captação" data-set-date="${esc(imageId)}">${SVG_CALENDAR}<input type="date" class="photo-slot-date-input" value=""></button>`
+            : '';
         return `<div class="photo-slot photo-slot--filled" data-image-id="${esc(imageId)}" data-slot="${slotNum}">
             <div class="photo-slot-inner">
                 <div class="photo-slot-thumb">
@@ -220,13 +240,17 @@ $filledCount   = count($images);
                     <div class="photo-slot-overlay">
                         <button class="overlay-btn" title="Ver imagem" data-lightbox="${esc(optimizedUrl)}" data-caption="${esc(name)}">${SVG_EXPAND}</button>
                         <a href="${esc(downloadUrl)}" class="overlay-btn" title="Transferir">${SVG_DOWNLOAD}</a>
+                        ${dateBtn}
                         ${delBtn}
                     </div>
                     <span class="photo-slot-number">${slotNum}</span>
                 </div>
                 <div class="photo-slot-meta">
                     <span class="photo-slot-label">${esc(name)}</span>
-                    <span class="photo-slot-size">${esc(filesizeHuman)}</span>
+                    <div class="photo-slot-meta-right">
+                        <span class="photo-slot-size">${esc(filesizeHuman)}</span>
+                        <span class="photo-slot-date" data-date-for="${esc(imageId)}">Sem data</span>
+                    </div>
                 </div>
             </div>
         </div>`;
@@ -260,6 +284,7 @@ $filledCount   = count($images);
         if (newSlot) {
             attachLightboxListeners(newSlot);
             attachDeleteListeners(newSlot);
+            attachDateListeners(newSlot);
         }
         filledCount++;
         updateCounter();
@@ -332,6 +357,50 @@ $filledCount   = count($images);
                 } catch (err) {
                     showToast('Erro de comunicação.', 'error');
                     this.disabled = false;
+                }
+            });
+        });
+    }
+
+    function attachDateListeners(container) {
+        container.querySelectorAll('[data-set-date]').forEach(btn => {
+            const input = btn.querySelector('.photo-slot-date-input');
+            if (!input) return;
+
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                input.dataset.prevValue = input.value;
+                if (typeof input.showPicker === 'function') {
+                    input.showPicker();
+                } else {
+                    input.focus();
+                    input.click();
+                }
+            });
+
+            input.addEventListener('click', (e) => e.stopPropagation());
+            input.addEventListener('change', async function () {
+                const id      = btn.dataset.setDate;
+                const dateEl  = document.querySelector(`.photo-slot-date[data-date-for="${id}"]`);
+                const prevVal = this.dataset.prevValue ?? '';
+
+                try {
+                    const res  = await fetch('/foto/' + id + '/data', {
+                        method : 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body   : 'captured_at=' + encodeURIComponent(this.value) + '&csrf_token=' + encodeURIComponent(csrfToken),
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        if (dateEl) dateEl.textContent = data.captured_at_human || 'Sem data';
+                        showToast('Data actualizada.', 'success');
+                    } else {
+                        this.value = prevVal;
+                        showToast(data.error || 'Erro ao actualizar a data.', 'error');
+                    }
+                } catch (err) {
+                    this.value = prevVal;
+                    showToast('Erro de comunicação.', 'error');
                 }
             });
         });
@@ -527,6 +596,7 @@ $filledCount   = count($images);
     document.querySelectorAll('.photo-slot--filled').forEach(slot => {
         attachLightboxListeners(slot);
         attachDeleteListeners(slot);
+        attachDateListeners(slot);
     });
     document.querySelectorAll('.photo-slot--empty:not(.photo-slot--readonly)').forEach(slot => {
         attachSlotListeners(slot);
