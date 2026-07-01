@@ -96,6 +96,9 @@ $router->get('/admin/marcas/:id/editar', 'AdminController@brandEdit');
 $router->post('/admin/marcas/:id/editar', 'AdminController@brandUpdate');
 $router->post('/admin/marcas/:id/eliminar', 'AdminController@brandDelete');
 
+// Admin — Location Audit
+$router->get('/admin/localizacoes/auditoria', 'AdminController@locationAudit');
+
 // Admin — Locations
 $router->get('/admin/marcas/:id/localizacoes', 'AdminController@locationList');
 $router->get('/admin/marcas/:id/localizacoes/criar', 'AdminController@locationCreate');

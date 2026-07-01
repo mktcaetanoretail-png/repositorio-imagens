@@ -561,6 +561,37 @@ class AdminController extends Controller
         }
     }
 
+    // ─── Location Audit ─────────────────────────────────────────────────────────
+
+    public function locationAudit(Request $request, array $params = []): void
+    {
+        $this->requirePermission('manage_brands');
+
+        $locationModel = new Location();
+        $locations     = $locationModel->findAllWithPhotoCounts();
+
+        $maxPhotos = LocationController::MAX_PHOTOS;
+        foreach ($locations as &$location) {
+            $location['photo_count'] = (int) $location['photo_count'];
+            $location['missing']     = max(0, $maxPhotos - $location['photo_count']);
+        }
+        unset($location);
+
+        $onlyMissing = $request->get('apenas_incompletas', '1') === '1';
+        $filtered    = $onlyMissing
+            ? array_values(array_filter($locations, fn($l) => $l['missing'] > 0))
+            : $locations;
+
+        $this->render('admin/locations/audit', [
+            'locations'    => $filtered,
+            'total_count'  => count($locations),
+            'missing_count'=> count(array_filter($locations, fn($l) => $l['missing'] > 0)),
+            'only_missing' => $onlyMissing,
+            'max_photos'   => $maxPhotos,
+            'csrf_token'   => $this->csrfToken(),
+        ]);
+    }
+
     // ─── Locations ────────────────────────────────────────────────────────────────
 
     public function locationList(Request $request, array $params = []): void

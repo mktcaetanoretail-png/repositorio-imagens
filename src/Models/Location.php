@@ -56,6 +56,25 @@ class Location extends Model
         )->fetchAll();
     }
 
+    /**
+     * Returns every location with its brand info and how many active
+     * (non-deleted) photos it currently has. Used by the location audit
+     * page to find locations with missing photos.
+     */
+    public function findAllWithPhotoCounts(): array
+    {
+        return $this->db()->query(
+            'SELECT l.id, l.name, l.slug,
+                    b.id AS brand_id, b.name AS brand_name, b.slug AS brand_slug,
+                    COUNT(i.id) FILTER (WHERE i.deleted_at IS NULL) AS photo_count
+             FROM "locations" l
+             JOIN "brands" b ON b.id = l.brand_id
+             LEFT JOIN "images" i ON i.location_id = l.id
+             GROUP BY l.id, l.name, l.slug, b.id, b.name, b.slug
+             ORDER BY b.name ASC, l.name ASC'
+        )->fetchAll();
+    }
+
     public function slugExistsForBrand(string $slug, int $brandId, ?int $excludeId = null): bool
     {
         $sql    = 'SELECT COUNT(*) AS cnt FROM "locations" WHERE "slug" = ? AND "brand_id" = ?';
