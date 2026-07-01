@@ -1903,7 +1903,7 @@ body.lightbox-open { overflow: hidden; }
     flex-shrink: 0;
 }
 
-.photo-slot-date { font-size: .72rem; color: var(--text-muted); white-space: nowrap; }
+.photo-slot-date { font-size: .8rem; font-weight: 700; color: var(--text); white-space: nowrap; }
 
 .photo-slot-date::after {
     content: '|';
